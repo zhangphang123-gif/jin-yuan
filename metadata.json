@@ -1,0 +1,6 @@
+{
+  "name": "錦源傳統肉乾肉絲專賣店",
+  "description": "錦源傳統肉乾肉絲專賣店（Jin Yuan Traditional Enterprise）官方商城，專營古法炭烤原味/黑胡椒/麻辣豬肉乾、香酥豬肉鬆、雞肉鬆、傳統黃梨酥與年餅，支援 WhatsApp 自動下單與後台出單系統。",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

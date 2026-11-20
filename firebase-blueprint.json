@@ -1,0 +1,151 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "Store products including Bak Kwa, Roast meats, Floss, Cookies and Sausage",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "sku": { "type": "string", "maxLength": 64 },
+        "nameZh": { "type": "string", "maxLength": 150 },
+        "nameEn": { "type": "string", "maxLength": 150 },
+        "category": { "type": "string", "enum": ["bakkwa", "floss", "cured", "roast", "cookies", "seasonal"] },
+        "categoryLabelZh": { "type": "string", "maxLength": 50 },
+        "meatType": { "type": "string", "enum": ["pork", "chicken", "duck", "cookies", "seasonal", "other"] },
+        "price": { "type": "number" },
+        "originalPrice": { "type": "number" },
+        "stock": { "type": "number" },
+        "unitWeight": { "type": "string", "maxLength": 80 },
+        "image": { "type": "string", "maxLength": 2048 },
+        "images": { "type": "array" },
+        "descriptionZh": { "type": "string", "maxLength": 2000 },
+        "featured": { "type": "boolean" },
+        "hotOrder": { "type": "number" },
+        "badge": { "type": "string", "maxLength": 80 },
+        "hasWeightOptions": { "type": "boolean" },
+        "weightType": { "type": "string", "maxLength": 50 },
+        "specs": { "type": "array" },
+        "variantOptions": { "type": "array" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "sku", "nameZh", "category", "price", "stock", "image"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Customer purchase orders",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "confirmed", "shipped", "completed", "cancelled"] },
+        "customer": { "type": "object" },
+        "items": { "type": "array" },
+        "subtotal": { "type": "number" },
+        "shippingFee": { "type": "number" },
+        "discount": { "type": "number" },
+        "total": { "type": "number" },
+        "paymentStatus": { "type": "string", "enum": ["unpaid", "paid"] },
+        "appliedPromoCode": { "type": "string", "maxLength": 64 },
+        "freeShippingGranted": { "type": "boolean" },
+        "freeGiftName": { "type": "string", "maxLength": 200 },
+        "paymentProofUrl": { "type": "string", "maxLength": 2048 },
+        "whatsappSent": { "type": "boolean" },
+        "trackingNumber": { "type": "string", "maxLength": 128 },
+        "internalNotes": { "type": "string", "maxLength": 2000 },
+        "referralCode": { "type": "string", "maxLength": 64 },
+        "referralName": { "type": "string", "maxLength": 120 },
+        "syncedToGoogleSheets": { "type": "boolean" },
+        "sheetsSyncedAt": { "type": "string" }
+      },
+      "required": ["id", "status", "customer", "items", "subtotal", "total"]
+    },
+    "Referral": {
+      "title": "Referral",
+      "description": "Sales agent / promoter referral tracking code and commission rate",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 64, "pattern": "^[a-zA-Z0-9]+$" },
+        "code": { "type": "string", "maxLength": 32, "pattern": "^[a-zA-Z0-9]+$" },
+        "name": { "type": "string", "maxLength": 100 },
+        "commissionRate": { "type": "number" },
+        "active": { "type": "boolean" },
+        "createdAt": { "type": "string", "maxLength": 64 },
+        "updatedAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "code", "name", "active", "createdAt"]
+    },
+    "StoreSettings": {
+      "title": "StoreSettings",
+      "description": "Store basic configuration, banners, announcements, promo codes, hot showcase ordering, and payment info",
+      "type": "object",
+      "properties": {
+        "storefrontTheme": { "type": "string", "enum": ["classic", "cny_festive"] },
+        "storeName": { "type": "string", "maxLength": 100 },
+        "storeSubname": { "type": "string", "maxLength": 150 },
+        "contactPerson": { "type": "string", "maxLength": 100 },
+        "whatsappNumber": { "type": "string", "maxLength": 50 },
+        "whatsappGreetingZh": { "type": "string", "maxLength": 300 },
+        "currency": { "type": "string", "maxLength": 20 },
+        "freeShippingThreshold": { "type": "number" },
+        "defaultShippingFee": { "type": "number" },
+        "duitnowId": { "type": "string", "maxLength": 150 },
+        "tngEwalletPhone": { "type": "string", "maxLength": 150 },
+        "bankAccount": { "type": "string", "maxLength": 200 },
+        "paymentQrCodeUrl": { "type": "string", "maxLength": 2048 },
+        "email": { "type": "string", "maxLength": 120 },
+        "storeAddress": { "type": "string", "maxLength": 300 },
+        "logoUrl": { "type": "string", "maxLength": 2048 },
+        "heroBannerUrl": { "type": "string", "maxLength": 2048 },
+        "bannerSlides": { "type": "array" },
+        "promoAnnouncements": { "type": "array" },
+        "promoCodes": { "type": "array" },
+        "referralDirectory": { "type": "object" },
+        "announcementText": { "type": "string", "maxLength": 500 },
+        "freeFlossPromoActive": { "type": "boolean" },
+        "featuredProductIds": { "type": "array" },
+        "hotSectionTitleZh": { "type": "string", "maxLength": 150 },
+        "hotSectionTitleEn": { "type": "string", "maxLength": 150 },
+        "hotAutoRotateSeconds": { "type": "number" },
+        "bannerAutoRotateSeconds": { "type": "number" },
+        "categories": { "type": "array" },
+        "cloudinaryCloudName": { "type": "string", "maxLength": 120 },
+        "cloudinaryUploadPreset": { "type": "string", "maxLength": 120 },
+        "brandStoryTitleZh": { "type": "string", "maxLength": 120 },
+        "brandStorySubtitleZh": { "type": "string", "maxLength": 300 },
+        "brandStorySection1TitleZh": { "type": "string", "maxLength": 150 },
+        "brandStorySection1BodyZh": { "type": "string", "maxLength": 2000 },
+        "brandStoryQuoteZh": { "type": "string", "maxLength": 1000 },
+        "brandStorySection2TitleZh": { "type": "string", "maxLength": 150 },
+        "brandStorySection2BodyZh": { "type": "string", "maxLength": 2000 },
+        "brandStorySection3TitleZh": { "type": "string", "maxLength": 150 },
+        "brandStorySection3BodyZh": { "type": "string", "maxLength": 2000 },
+        "brandStoryClosingZh": { "type": "string", "maxLength": 1500 },
+        "brandStoryWorkshopImg": { "type": "string", "maxLength": 2048 },
+        "brandStoryWorkshopTitleZh": { "type": "string", "maxLength": 150 },
+        "brandStoryWorkshopCaptionZh": { "type": "string", "maxLength": 500 },
+        "brandStoryHeritageImg": { "type": "string", "maxLength": 2048 },
+        "brandStoryHeritageTitleZh": { "type": "string", "maxLength": 150 },
+        "brandStoryHeritageCaptionZh": { "type": "string", "maxLength": 500 }
+      },
+      "required": ["storeName", "whatsappNumber"]
+    }
+  },
+  "firestore": {
+    "/products/{productId}": {
+      "schema": "Product",
+      "description": "Public catalog of store products"
+    },
+    "/orders/{orderId}": {
+      "schema": "Order",
+      "description": "Store orders placed by customers and managed by store admin"
+    },
+    "/referrals/{referralId}": {
+      "schema": "Referral",
+      "description": "Sales agent / promoter referral profiles managed by store admin"
+    },
+    "/settings/{settingId}": {
+      "schema": "StoreSettings",
+      "description": "Store configuration, categories, banners, and brand story"
+    }
+  }
+}

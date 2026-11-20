@@ -1,0 +1,104 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // Strictly restrict admin permissions to the two verified Store Manager Gmail accounts
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email.lower() in [
+          'zhangphang123@gmail.com',
+          'jinyuanheng88@gmail.com'
+        ];
+    }
+
+    // Validation blueprint for Referral documents
+    function isValidReferral(data) {
+      return data.keys().hasAll(['id', 'code', 'name', 'active', 'createdAt'])
+        && data.keys().hasOnly(['id', 'code', 'name', 'commissionRate', 'active', 'createdAt', 'updatedAt'])
+        && data.id is string
+        && data.id.size() >= 2
+        && data.id.size() <= 64
+        && data.id.matches('^[a-zA-Z0-9]+$')
+        && data.code is string
+        && data.code.size() >= 2
+        && data.code.size() <= 32
+        && data.code.matches('^[a-zA-Z0-9]+$')
+        && data.name is string
+        && data.name.size() >= 1
+        && data.name.size() <= 100
+        && data.active is bool
+        && data.createdAt is string
+        && data.createdAt.size() <= 64
+        && (!('updatedAt' in data) || (data.updatedAt is string && data.updatedAt.size() <= 64))
+        && (!('commissionRate' in data) || (data.commissionRate is number && data.commissionRate >= 0 && data.commissionRate <= 100));
+    }
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Products catalog: public read, authorized admin Gmail write
+    match /products/{productId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin() && isValidId(productId);
+    }
+
+    // Orders: customers can create pending orders; only authorized admin Gmails can read, update, or delete
+    match /orders/{orderId} {
+      allow create: if isValidId(orderId)
+        && request.resource.data.id == orderId
+        && request.resource.data.id is string
+        && request.resource.data.items is list
+        && request.resource.data.items.size() > 0
+        && request.resource.data.items.size() <= 100
+        && request.resource.data.total is number
+        && request.resource.data.total >= 0
+        && request.resource.data.subtotal is number
+        && request.resource.data.subtotal >= 0
+        && request.resource.data.customer is map
+        && (!('referralCode' in request.resource.data) || (request.resource.data.referralCode is string && request.resource.data.referralCode.size() <= 64))
+        && (!('referralName' in request.resource.data) || (request.resource.data.referralName is string && request.resource.data.referralName.size() <= 120))
+        && (isAdmin() || request.resource.data.status == 'pending');
+      allow get, list, update, delete: if isAdmin();
+    }
+
+    // Referrals & sales agents: strict admin-only read/write (storefront resolves via cached settings directory)
+    match /referrals/{referralId} {
+      allow get, list: if isAdmin();
+      allow create: if isAdmin()
+        && isValidId(referralId)
+        && request.resource.data.id == referralId
+        && isValidReferral(request.resource.data);
+      allow update: if isAdmin()
+        && isValidId(referralId)
+        && request.resource.data.id == referralId
+        && isValidReferral(request.resource.data)
+        && request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if isAdmin() && isValidId(referralId);
+    }
+
+    // Store settings & banners: public read, authorized admin Gmail write
+    match /settings/{settingId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin() && isValidId(settingId);
+    }
+
+    // Legacy media collection locked down (all images are hosted on Cloudinary URLs)
+    match /media/{mediaId} {
+      allow read, write: if false;
+    }
+
+    // Admin accounts metadata
+    match /admins/{adminId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+  }
+}

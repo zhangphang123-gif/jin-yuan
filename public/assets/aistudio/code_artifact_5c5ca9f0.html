@@ -1,0 +1,1532 @@
+<!doctype html>
+<html lang="zh-MY">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>錦源傳統肉乾肉絲專賣店 | Jin Yuan Traditional Enterprise</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              red: '#941a19',
+              darkred: '#6b1110',
+              lightred: '#fdf2f2',
+              gold: '#c69a57',
+              goldhover: '#b38642',
+              cream: '#faf6ef',
+              dark: '#2d1512'
+            }
+          },
+          fontFamily: {
+            serif: ['"Noto Serif SC"', '"Songti SC"', 'Georgia', 'serif'],
+            sans: ['Inter', '"Microsoft YaHei"', 'system-ui', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    html { scroll-behavior: smooth; }
+    .drawer-transition { transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+    .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #d6c3b3; border-radius: 6px; }
+    .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-fade { animation: fadeIn 0.25s ease-out forwards; }
+  </style>
+</head>
+<body class="bg-brand-cream text-brand-dark font-sans antialiased selection:bg-brand-red selection:text-white pb-20 md:pb-0">
+
+  <!-- 1. 頂部雙模式切換控制列 -->
+  <div id="shopifyTopBar" class="sticky top-0 z-50 bg-stone-900 text-white border-b border-stone-700 px-3 sm:px-6 py-2 shadow-lg">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-500/25 text-emerald-300 border border-emerald-500/30">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          Shopify 雙模式管理系統
+        </span>
+        <span class="text-xs text-stone-400 hidden md:inline">買餅即送 50g 招牌肉鬆活動已上線 · 支援隨時換圖改價與一鍵匯出</span>
+      </div>
+
+      <div class="flex items-center gap-1.5 sm:gap-2 ml-auto">
+        <button id="btnModeStore" onclick="switchAppMode('store')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-brand-red text-white shadow">
+          <span>🛍️ 前台網店預覽</span>
+        </button>
+        <button id="btnModeAdmin" onclick="switchAppMode('admin')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-stone-800 hover:bg-stone-700 text-amber-300 border border-amber-500/30">
+          <span>⚙️ 店長管理後台 (改圖/改價/促銷)</span>
+        </button>
+        <button onclick="exportUpdatedHTML()" title="將目前修改好的照片、價格與設定打包下載成最新 HTML 檔案" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500 hover:bg-amber-400 text-stone-950 transition flex items-center gap-1 shadow">
+          <span>💾 匯出更新後的 HTML</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. 前台網店視圖 -->
+  <div id="storefrontView" class="block">
+    
+    <!-- 頂部公告欄 -->
+    <div class="bg-brand-darkred text-amber-100 text-xs py-2 px-4 border-b border-amber-500/20">
+      <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+        <div class="flex items-center gap-2 font-medium tracking-wide">
+          <span class="bg-brand-gold text-brand-dark font-black px-2 py-0.5 rounded text-[10px]">🔥 限時特惠</span>
+          <span id="topAnnouncementText">🔥 新年大回饋：購買任意傳統年餅 / 禮盒即免費贈送 50g 招牌肉鬆！全馬常溫真空郵寄 · 檳城北賴門市自取</span>
+        </div>
+        <div class="flex items-center gap-3 ml-auto text-[11px] text-amber-200/90">
+          <button onclick="openMemberModal()" class="hover:text-white underline">👑 會員查詢 / 積分領取</button>
+          <span>|</span>
+          <button onclick="switchAppMode('admin')" class="hover:text-white underline">店長後台 ➔</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 導航頂欄 -->
+    <header class="sticky top-[45px] z-30 bg-white/95 backdrop-blur-md shadow-sm border-b border-amber-900/10">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-3">
+        <a href="#" onclick="setCategory('全部')" class="flex items-center gap-3.5 group">
+          <div class="w-12 h-12 bg-gradient-to-br from-brand-dark to-brand-red text-amber-300 flex items-center justify-center rounded-xl shadow-lg border border-amber-400/50 group-hover:scale-105 transition">
+            <span class="font-serif text-2xl font-black">錦</span>
+          </div>
+          <div class="flex flex-col">
+            <span id="headerStoreName" class="font-serif text-2xl font-black text-brand-red tracking-widest leading-none">錦源肉乾</span>
+            <span id="headerStoreSub" class="text-[9px] tracking-[0.2em] text-amber-900 font-extrabold uppercase mt-1">JIN YUAN · EST. 1985</span>
+          </div>
+        </a>
+
+        <nav class="hidden xl:flex items-center gap-4 text-sm font-bold text-stone-700">
+          <a href="#heroSection" class="hover:text-brand-red transition">首頁</a>
+          <a href="#bundlesSection" class="text-brand-red hover:underline transition flex items-center gap-1 font-black">🧧 買餅送肉松 & 禮盒</a>
+          <a href="#productsSection" onclick="setCategory('傳統肉乾')" class="hover:text-brand-red transition">傳統肉乾</a>
+          <a href="#productsSection" onclick="setCategory('造型肉乾')" class="hover:text-brand-red transition">生肖造型肉乾</a>
+          <a href="#productsSection" onclick="setCategory('肉松系列')" class="hover:text-brand-red transition">招牌肉松</a>
+          <a href="#productsSection" onclick="setCategory('臘腸與臘肉')" class="hover:text-brand-red transition">老酒臘味/肉粽</a>
+        </nav>
+
+        <div class="flex items-center gap-2">
+          <div class="relative hidden sm:block">
+            <input type="text" id="quickSearchInput" oninput="handleSearchInput(this.value)" placeholder="搜尋肉乾、元寶、肉松..." class="w-44 lg:w-56 text-xs bg-stone-100 border border-stone-200 rounded-full pl-8 pr-3 py-2 focus:outline-none focus:border-brand-red focus:bg-white transition">
+            <span class="absolute left-2.5 top-2 text-stone-400 text-xs">🔍</span>
+          </div>
+
+          <button onclick="openMemberModal()" class="px-3 py-2 rounded-full bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-xs font-bold flex items-center gap-1.5 transition">
+            <span>👑</span>
+            <span id="navMemberLabel" class="hidden md:inline">會員中心</span>
+          </button>
+
+          <button onclick="openCartDrawer()" class="px-3.5 py-2 rounded-full bg-brand-red hover:bg-brand-darkred text-white text-xs font-bold flex items-center gap-1.5 shadow-md transition">
+            <span>🛒 購物車</span>
+            <span id="navCartBadge" class="bg-amber-300 text-brand-dark px-1.5 py-0.2 rounded-full text-[11px] font-black">0</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- 主視覺輪播區 -->
+    <section id="heroSection" class="relative bg-brand-dark text-white overflow-hidden select-none"
+      onmousedown="onHeroDragStart(event)"
+      onmousemove="onHeroDragMove(event)"
+      onmouseup="onHeroDragEnd(event)"
+      onmouseleave="onHeroDragEnd(event)">
+      <div id="heroSlidesContainer" class="relative min-h-[380px] sm:min-h-[440px] flex items-center"></div>
+      <div class="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2" id="heroDotsContainer"></div>
+    </section>
+
+    <!-- 四大品牌保證條 -->
+    <section class="bg-white border-b border-amber-900/10 py-4 px-4">
+      <div class="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+        <div class="flex items-center gap-3 p-2 rounded-xl bg-amber-50/60">
+          <span class="text-2xl">🔥</span>
+          <div><b class="text-brand-dark block text-sm">正宗傳統炭香</b><span class="text-stone-500">北賴老字號手工現烤</span></div>
+        </div>
+        <div class="flex items-center gap-3 p-2 rounded-xl bg-amber-50/60">
+          <span class="text-2xl">🎁</span>
+          <div><b class="text-brand-dark block text-sm">買餅即送肉松</b><span class="text-stone-500">任選年餅免費送 50g 招牌肉松</span></div>
+        </div>
+        <div class="flex items-center gap-3 p-2 rounded-xl bg-amber-50/60">
+          <span class="text-2xl">📦</span>
+          <div><b class="text-brand-dark block text-sm">全馬真空郵寄</b><span class="text-stone-500">獨立真空鎖住新鮮肉汁</span></div>
+        </div>
+        <div class="flex items-center gap-3 p-2 rounded-xl bg-amber-50/60">
+          <span class="text-2xl">🏪</span>
+          <div><b class="text-brand-dark block text-sm">Chai Leng Park 自取</b><span class="text-stone-500">檳城北賴門市新鮮直供</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 促銷活動與主打年貨禮盒區 -->
+    <section id="bundlesSection" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-4">
+      <div class="flex flex-wrap items-end justify-between gap-2 mb-5">
+        <div>
+          <span class="text-xs font-extrabold tracking-widest uppercase text-brand-red">FESTIVE PROMOTIONS & BUNDLES</span>
+          <h2 class="font-serif text-2xl sm:text-3xl font-black text-brand-dark mt-1">🧧 買餅送 50g 招牌肉松 · 新春主打禮盒</h2>
+        </div>
+        <button onclick="switchAppMode('admin'); switchAdminTab('promotions')" class="text-xs text-stone-500 hover:text-brand-red underline">⚙️ 店長點此修改促銷橫幅</button>
+      </div>
+      <div id="promoCardsGrid" class="grid grid-cols-1 md:grid-cols-3 gap-5"></div>
+    </section>
+
+    <!-- 商品型錄與分類篩選區 -->
+    <section id="productsSection" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <div class="flex flex-wrap items-end justify-between gap-4 mb-6">
+        <div>
+          <span class="text-xs font-extrabold tracking-widest uppercase text-amber-800">AUTHENTIC CATALOG</span>
+          <h2 class="font-serif text-2xl sm:text-3xl font-black text-brand-dark mt-1">錦源全系列美食型錄</h2>
+          <p class="text-xs text-stone-500 mt-1">自由切換 100g / 250g / 300g / 500g / 1kg 等多規格，買餅即享 50g 肉松贈禮</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <input type="text" id="mobileSearchInput" oninput="handleSearchInput(this.value)" placeholder="輸入關鍵字篩選商品..." class="sm:hidden text-xs bg-white border border-stone-300 rounded-full px-3 py-2">
+          <button onclick="switchAppMode('admin'); switchAdminTab('products'); openProductModal()" class="px-3.5 py-2 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 text-xs font-bold transition flex items-center gap-1">
+            <span>＋ 新增或修改商品</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="categoryFilterBar" class="flex items-center gap-2 overflow-x-auto pb-3 mb-6 custom-scroll"></div>
+      <div id="storeProductGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"></div>
+    </section>
+
+    <!-- 會員俱樂部橫幅 -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div class="bg-gradient-to-r from-brand-dark via-brand-darkred to-brand-red rounded-3xl p-6 sm:p-10 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
+        <div class="max-w-xl">
+          <span class="px-3 py-1 rounded-full bg-amber-400/20 border border-amber-300/40 text-amber-200 text-xs font-bold">JIN YUAN VIP CLUB</span>
+          <h3 class="font-serif text-2xl sm:text-3xl font-black mt-3">加入錦源會員 · 消費累積積分與專屬折扣</h3>
+          <p class="text-xs sm:text-sm text-amber-100/90 mt-2 leading-relaxed">
+            登記手機號碼即可成為會員！新會員即贈迎新積分（RM 1 = 1 分），累積達指定積分自動升級銀卡/金卡/至尊 VIP，結帳自動享有等級折扣！
+          </p>
+        </div>
+        <div class="flex flex-wrap gap-3">
+          <button onclick="openMemberModal()" class="px-6 py-3.5 rounded-full bg-amber-400 hover:bg-amber-300 text-brand-dark font-black text-sm shadow-lg transition">
+            👑 立即註冊 / 查詢積分
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 頁尾資訊 -->
+    <footer class="bg-brand-dark text-amber-100/80 mt-12 border-t-4 border-brand-gold">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 grid grid-cols-1 md:grid-cols-3 gap-8 text-xs leading-relaxed">
+        <div>
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-9 h-9 bg-brand-red text-amber-200 flex items-center justify-center rounded-lg font-serif font-black text-lg">錦</div>
+            <span id="footerStoreName" class="font-serif text-xl font-black text-amber-200 tracking-wider">錦源傳統肉乾肉絲專賣店</span>
+          </div>
+          <p class="text-stone-400">JIN YUAN TRADITIONAL ENTERPRISE<br>堅持傳統工藝、古法炭烤肉乾、特酥肉鬆、精緻老酒臘腸與五香肉粽。過年送禮、家庭自吃首選。</p>
+        </div>
+        <div>
+          <h4 class="text-amber-300 font-bold text-sm mb-3">配送與取貨方式</h4>
+          <ul class="space-y-1.5 text-stone-300">
+            <li>• <b>全馬常溫郵寄</b>：真空獨立密封包裝，安全衛生</li>
+            <li>• <b>門市自取</b>：檳城北賴 Chai Leng Park 門市現烤現取</li>
+            <li>• <b>買餅送肉鬆</b>：全店購買年餅即送 50g 招牌肉鬆</li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-amber-300 font-bold text-sm mb-3">門市與聯絡資訊</h4>
+          <p id="footerContactPerson">聯絡人：王銮娇 (HENG LUAN KEOW)</p>
+          <p id="footerPhone">WhatsApp / 電話：012-494 7842</p>
+          <p id="footerEmail">電郵：workinfo.jinyuan@gmail.com</p>
+          <p id="footerAddress" class="mt-1">地址：29, Medan Kurau 1, Chai Leng Park, 13700 Perai, Pulau Pinang</p>
+        </div>
+      </div>
+      <div class="border-t border-white/10 py-4 text-center text-[11px] text-stone-500">
+        © 2026 Jin Yuan Traditional Enterprise. All Rights Reserved.
+      </div>
+    </footer>
+  </div>
+
+  <!-- 3. SHOPIFY 店長管理後台 -->
+  <div id="adminCmsView" class="hidden min-h-screen bg-stone-100 text-stone-800">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <aside class="lg:col-span-3 space-y-2">
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-stone-200">
+          <div class="flex items-center gap-3 pb-3 mb-3 border-b border-stone-100">
+            <div class="w-10 h-10 rounded-xl bg-brand-red text-white flex items-center justify-center font-black">CMS</div>
+            <div>
+              <h2 class="font-black text-sm text-stone-900">錦源 Shopify 店長後台</h2>
+              <p class="text-[11px] text-stone-500">買餅送肉鬆活動管理 · 自動保存</p>
+            </div>
+          </div>
+
+          <nav class="space-y-1 text-xs font-bold" id="adminSidebarNav">
+            <button onclick="switchAdminTab('dashboard')" data-tab="dashboard" class="admin-nav-btn w-full text-left px-3.5 py-2.5 rounded-xl flex items-center justify-between transition bg-brand-red text-white">
+              <span>📊 營運總覽與快速指南</span>
+              <span>›</span>
+            </button>
+            <button onclick="switchAdminTab('products')" data-tab="products" class="admin-nav-btn w-full text-left px-3.5 py-2.5 rounded-xl flex items-center justify-between transition hover:bg-stone-100 text-stone-700">
+              <span>🥩 商品、照片與價格管理</span>
+              <span id="adminProdCountBadge" class="bg-stone-200 text-stone-700 px-2 py-0.5 rounded-full text-[10px]">0</span>
+            </button>
+            <button onclick="switchAdminTab('promotions')" data-tab="promotions" class="admin-nav-btn w-full text-left px-3.5 py-2.5 rounded-xl flex items-center justify-between transition hover:bg-stone-100 text-stone-700">
+              <span>🎁 促銷橫幅與優惠碼設定</span>
+              <span>›</span>
+            </button>
+            <button onclick="switchAdminTab('members')" data-tab="members" class="admin-nav-btn w-full text-left px-3.5 py-2.5 rounded-xl flex items-center justify-between transition hover:bg-stone-100 text-stone-700">
+              <span>👑 會員名單與等級積分規則</span>
+              <span id="adminMemberCountBadge" class="bg-stone-200 text-stone-700 px-2 py-0.5 rounded-full text-[10px]">0</span>
+            </button>
+            <button onclick="switchAdminTab('orders')" data-tab="orders" class="admin-nav-btn w-full text-left px-3.5 py-2.5 rounded-xl flex items-center justify-between transition hover:bg-stone-100 text-stone-700">
+              <span>📦 訂單管理與 WhatsApp 跟進</span>
+              <span id="adminOrderCountBadge" class="bg-amber-200 text-amber-900 px-2 py-0.5 rounded-full text-[10px]">0</span>
+            </button>
+            <button onclick="switchAdminTab('settings')" data-tab="settings" class="admin-nav-btn w-full text-left px-3.5 py-2.5 rounded-xl flex items-center justify-between transition hover:bg-stone-100 text-stone-700">
+              <span>🏪 店鋪資料與輪播圖設定</span>
+              <span>›</span>
+            </button>
+          </nav>
+
+          <div class="mt-4 pt-4 border-t border-stone-100 space-y-2">
+            <button onclick="switchAppMode('store')" class="w-full py-2.5 px-3 rounded-xl bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold transition">
+              👁️ 返回查看前台網店效果
+            </button>
+            <button onclick="exportUpdatedHTML()" class="w-full py-2.5 px-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 text-xs font-black transition">
+              💾 匯出包含最新修改的 HTML
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      <main class="lg:col-span-9">
+        <div id="adminMainPanel" class="bg-white rounded-2xl p-5 sm:p-7 shadow-sm border border-stone-200 min-h-[620px]"></div>
+      </main>
+    </div>
+  </div>
+
+  <!-- 4. 購物車側邊抽屜 -->
+  <div id="cartOverlay" onclick="closeCartDrawer()" class="fixed inset-0 bg-black/50 z-50 hidden"></div>
+  <aside id="cartDrawer" class="fixed top-0 right-0 h-full w-full max-w-md bg-white z-50 shadow-2xl flex flex-col translate-x-full drawer-transition">
+    <div class="p-4 sm:p-5 bg-brand-red text-white flex items-center justify-between">
+      <div>
+        <h3 class="font-serif text-lg font-black">🛒 您的選購清單</h3>
+        <p class="text-[11px] text-amber-200">買餅即送 50g 招牌肉松 · 一鍵發送至 WhatsApp 結帳</p>
+      </div>
+      <button onclick="closeCartDrawer()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-lg font-bold">×</button>
+    </div>
+
+    <div class="flex-1 overflow-y-auto p-4 space-y-4 custom-scroll">
+      <div id="cartItemsList" class="space-y-3"></div>
+
+      <div class="bg-amber-50/80 border border-amber-200/80 rounded-2xl p-3.5 space-y-3 text-xs">
+        <div class="flex items-center gap-2 text-brand-red font-bold">
+          <span>🎁</span>
+          <span>限時好康：凡選購任意年餅或禮盒，系統將自動附贈 50g 招牌肉鬆乙包！</span>
+        </div>
+        <div>
+          <label class="font-bold text-stone-700 block mb-1">🎁 優惠折扣碼 (Coupon Code)</label>
+          <div class="flex gap-2">
+            <input type="text" id="cartCouponInput" placeholder="輸入如 JINYUAN88 或 CNY2026" class="flex-1 px-3 py-2 rounded-lg border border-stone-300 bg-white uppercase text-xs">
+            <button onclick="applyCartCoupon()" class="px-3.5 py-2 rounded-lg bg-brand-dark text-white font-bold hover:bg-stone-800">套用</button>
+          </div>
+          <p id="cartCouponFeedback" class="text-[11px] mt-1 font-medium"></p>
+        </div>
+
+        <div class="border-t border-amber-200/70 pt-2.5">
+          <label class="font-bold text-stone-700 block mb-1">👑 會員手機號碼 (自動計算積分與等級折扣)</label>
+          <input type="text" id="cartMemberPhone" oninput="lookupCartMember(this.value)" placeholder="輸入已登記會員電話 (例: 0123456789)" class="w-full px-3 py-2 rounded-lg border border-stone-300 bg-white text-xs">
+          <p id="cartMemberFeedback" class="text-[11px] mt-1 text-amber-900 font-medium"></p>
+        </div>
+      </div>
+
+      <div class="bg-stone-50 border border-stone-200 rounded-2xl p-3.5 space-y-2.5 text-xs">
+        <h4 class="font-bold text-stone-800">📋 訂購人與取貨資訊</h4>
+        <div>
+          <label class="text-stone-600 block mb-1">顧客姓名 *</label>
+          <input type="text" id="orderBuyerName" placeholder="請輸入您的稱呼" class="w-full px-3 py-2 rounded-lg border border-stone-300 bg-white">
+        </div>
+        <div>
+          <label class="text-stone-600 block mb-1">聯絡電話 (WhatsApp) *</label>
+          <input type="text" id="orderBuyerPhone" placeholder="例如：012-3456789" class="w-full px-3 py-2 rounded-lg border border-stone-300 bg-white">
+        </div>
+        <div>
+          <label class="text-stone-600 block mb-1">取貨 / 配送方式 *</label>
+          <select id="orderDeliveryMethod" onchange="renderCartDrawer()" class="w-full px-3 py-2 rounded-lg border border-stone-300 bg-white font-medium">
+            <option value="全馬常溫郵寄 (真空包裝)">🚚 全馬常溫郵寄 (真空獨立包裝)</option>
+            <option value="檳城北賴 Chai Leng Park 門市自取">🏪 檳城北賴 Chai Leng Park 門市自取</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-stone-600 block mb-1">收件地址或自取備註</label>
+          <textarea id="orderBuyerAddress" rows="2" placeholder="請填寫郵寄完整地址，或預計到店自取日期與時間" class="w-full px-3 py-2 rounded-lg border border-stone-300 bg-white"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-4 bg-stone-100 border-t border-stone-200 space-y-2 text-xs">
+      <div id="cartPriceBreakdown" class="space-y-1 text-stone-600"></div>
+      <button onclick="submitWhatsAppOrder()" class="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm shadow-lg flex items-center justify-center gap-2 transition">
+        <span>📲 一鍵發送 WhatsApp 訂單給王女士</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- 5. 商品新增/編輯彈窗 -->
+  <div id="productModalOverlay" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-3">
+    <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-stone-200 animate-fade">
+      <div class="p-5 border-b border-stone-200 flex items-center justify-between sticky top-0 bg-white z-10">
+        <h3 id="productModalTitle" class="font-black text-lg text-stone-900">✏️ 編輯商品資料、照片與價格</h3>
+        <button onclick="closeProductModal()" class="w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 font-bold">×</button>
+      </div>
+
+      <div class="p-5 space-y-4 text-xs">
+        <input type="hidden" id="editProdId">
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="font-bold text-stone-700 block mb-1">商品名稱 *</label>
+            <input type="text" id="editProdName" placeholder="例如：招牌原味肉乾" class="w-full px-3 py-2 rounded-lg border border-stone-300">
+          </div>
+          <div>
+            <label class="font-bold text-stone-700 block mb-1">商品分類 *</label>
+            <select id="editProdCategory" class="w-full px-3 py-2 rounded-lg border border-stone-300 bg-white">
+              <option value="新年禮盒配套">🧧 新年禮盒配套 (買餅送肉松)</option>
+              <option value="傳統肉乾">🥩 傳統肉乾</option>
+              <option value="造型肉乾">🪙 造型肉乾 (250g)</option>
+              <option value="小造型肉乾">✨ 小造型肉乾 (一口吃)</option>
+              <option value="肉松系列">🧶 招牌肉松系列</option>
+              <option value="臘腸與臘肉">🥓 臘腸與臘肉</option>
+              <option value="肉粽與月餅">粽 肉粽與月餅</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="font-bold text-stone-700 block mb-1">促銷標籤 (Badge)</label>
+            <input type="text" id="editProdBadge" placeholder="例如：買餅送50g肉松 / 招牌必買" class="w-full px-3 py-2 rounded-lg border border-stone-300">
+          </div>
+          <div>
+            <label class="font-bold text-stone-700 block mb-1">供應狀態</label>
+            <select id="editProdStatus" class="w-full px-3 py-2 rounded-lg border border-stone-300 bg-white">
+              <option value="instock">✅ 現貨供應中</option>
+              <option value="inquire">💬 季節預訂 / WhatsApp 詢價</option>
+              <option value="soldout">⛔ 暫時售罄</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="font-bold text-stone-700 block mb-1">商品介紹與規格說明</label>
+          <textarea id="editProdDesc" rows="2" placeholder="輸入口感描述..." class="w-full px-3 py-2 rounded-lg border border-stone-300"></textarea>
+        </div>
+
+        <div class="bg-amber-50/70 border border-amber-200 rounded-xl p-4 space-y-3">
+          <label class="font-black text-amber-950 block">📸 商品照片更換 (支援上傳檔案或貼上網址)</label>
+          <div class="flex flex-col sm:flex-row items-center gap-4">
+            <img id="editProdImgPreview" src="" alt="預覽" class="w-28 h-28 object-cover rounded-xl border border-stone-300 bg-white shrink-0">
+            <div class="flex-1 space-y-2 w-full">
+              <div>
+                <span class="text-[11px] font-bold text-stone-700 block mb-1">選擇照片檔案</span>
+                <input type="file" id="editProdFileInput" accept="image/*" onchange="handleProductImageUpload(event)" class="block w-full text-xs text-stone-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-brand-red file:text-white">
+              </div>
+              <div>
+                <span class="text-[11px] font-bold text-stone-700 block mb-1">或貼上圖片網址</span>
+                <input type="text" id="editProdImgUrl" oninput="document.getElementById('editProdImgPreview').src = this.value" placeholder="https://..." class="w-full px-3 py-1.5 rounded-lg border border-stone-300 bg-white">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-stone-50 border border-stone-200 rounded-xl p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <label class="font-black text-stone-900">💰 規格與價格設定</label>
+            <button type="button" onclick="addSpecRowInModal('', 15)" class="px-2.5 py-1 rounded-lg bg-brand-red text-white font-bold text-[11px]">＋ 新增規格</button>
+          </div>
+          <div id="editProdSpecsContainer" class="space-y-2"></div>
+        </div>
+      </div>
+
+      <div class="p-4 border-t border-stone-200 bg-stone-50 flex items-center justify-end gap-2 sticky bottom-0">
+        <button onclick="closeProductModal()" class="px-4 py-2 rounded-xl border border-stone-300 bg-white font-bold text-xs">取消</button>
+        <button onclick="saveProductFromModal()" class="px-5 py-2 rounded-xl bg-brand-red hover:bg-brand-darkred text-white font-black text-xs shadow">💾 儲存修改</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. 前台會員中心彈窗 -->
+  <div id="memberModalOverlay" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-3">
+    <div class="bg-white rounded-2xl max-w-md w-full overflow-hidden shadow-2xl border border-stone-200 animate-fade">
+      <div class="p-5 bg-gradient-to-r from-brand-dark to-brand-red text-white flex items-center justify-between">
+        <div>
+          <span class="text-[10px] tracking-widest uppercase text-amber-300 font-bold">JIN YUAN VIP CLUB</span>
+          <h3 class="font-serif text-xl font-black">錦源會員中心</h3>
+        </div>
+        <button onclick="closeMemberModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 font-bold">×</button>
+      </div>
+      <div class="p-5 space-y-4 text-xs">
+        <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-amber-950 leading-relaxed">
+          <b>會員福利說明：</b><br>
+          • 註冊即送 <b id="lblWelcomePts">50</b> 積分，每消費 RM 1 累積 <b id="lblPtsPerRm">1</b> 分。<br>
+          • 銀卡 (100分) 98折 · 金卡 (300分) 95折 · VIP (600分) 92折
+        </div>
+        <div>
+          <label class="font-bold text-stone-700 block mb-1">您的姓名</label>
+          <input type="text" id="memModalName" placeholder="輸入姓名" class="w-full px-3 py-2 rounded-lg border border-stone-300">
+        </div>
+        <div>
+          <label class="font-bold text-stone-700 block mb-1">手機號碼 (WhatsApp) *</label>
+          <input type="text" id="memModalPhone" placeholder="例如：0123456789" class="w-full px-3 py-2 rounded-lg border border-stone-300">
+        </div>
+        <button onclick="registerOrLoginMember()" class="w-full py-3 rounded-xl bg-brand-red hover:bg-brand-darkred text-white font-black shadow">
+          👑 查詢會員卡 / 立即登記
+        </button>
+        <div id="memberCardDisplay" class="hidden"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="appToast" class="fixed bottom-6 right-6 z-50 bg-stone-900 text-white px-4 py-3 rounded-xl shadow-2xl text-xs font-bold opacity-0 pointer-events-none transition-opacity duration-300 flex items-center gap-2 border border-amber-400/30"></div>
+
+  <!-- 7. 核心資料庫與互動邏輯 -->
+  <script id="jinYuanInitialDataScript">
+    function makeFoodSvg(title, subtitle, bg1 = '#7f1d1d', bg2 = '#b45309') {
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="450" viewBox="0 0 600 450">
+        <defs>
+          <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="${bg1}"/>
+            <stop offset="100%" stop-color="${bg2}"/>
+          </linearGradient>
+        </defs>
+        <rect width="600" height="450" fill="url(#g)"/>
+        <circle cx="520" cy="80" r="110" fill="#fbbf24" fill-opacity="0.12"/>
+        <circle cx="80" cy="380" r="140" fill="#fbbf24" fill-opacity="0.1"/>
+        <rect x="28" y="28" width="544" height="394" rx="18" fill="none" stroke="#fde68a" stroke-opacity="0.45" stroke-width="2"/>
+        <text x="50%" y="38%" dominant-baseline="middle" text-anchor="middle" fill="#fde68a" font-family="serif" font-size="22" font-weight="bold" letter-spacing="4">錦源傳統炭烤</text>
+        <text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" fill="#ffffff" font-family="serif" font-size="38" font-weight="900">${title}</text>
+        <text x="50%" y="68%" dominant-baseline="middle" text-anchor="middle" fill="#fef3c7" font-family="sans-serif" font-size="18" opacity="0.9">${subtitle}</text>
+      </svg>`;
+      return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+    }
+
+    const DEFAULT_STORE_DATA = {
+      settings: {
+        storeName: "錦源肉乾",
+        storeFullName: "錦源傳統肉乾肉絲專賣店",
+        storeSubName: "Jin Yuan · Est. 1985",
+        announcement: "🔥 新年大回饋：購買任意傳統年餅 / 禮盒即免費贈送 50g 招牌肉松！全馬常溫真空郵寄 · 北賴門市自取",
+        whatsappNumber: "60124947842",
+        contactPerson: "王銮娇 (HENG LUAN KEOW)",
+        phoneDisplay: "012-494 7842",
+        email: "workinfo.jinyuan@gmail.com",
+        address: "29, Medan Kurau 1, Chai Leng Park, 13700 Perai, Pulau Pinang"
+      },
+      slides: [
+        {
+          id: "s1",
+          eyebrow: "BUY PASTRY GET FREE PORK FLOSS",
+          title: "🔥 買餅即送 50g 招牌肉松 · 北賴老字號古法炭烤",
+          subtitle: "精選優質年餅禮盒，限時加碼免費贈送 50g 香酥招牌肉松！全馬真空郵寄。",
+          ctaText: "查看禮盒與年餅",
+          ctaCategory: "新年禮盒配套",
+          img: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&q=80"
+        },
+        {
+          id: "s2",
+          eyebrow: "CNY AUSPICIOUS GIFT SETS",
+          title: "招財金元寶 · 十二生肖造型肉乾",
+          subtitle: "過年拜年桌上必備好彩頭！金元寶、銅錢、兔子、猛虎與米奇造型，送禮大氣體面。",
+          ctaText: "瀏覽造型肉乾",
+          ctaCategory: "造型肉乾",
+          img: "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?auto=format&fit=crop&w=1200&q=80"
+        }
+      ],
+      promotions: [
+        {
+          id: "promo1",
+          tag: "🔥 買餅即送 50g 肉松",
+          title: "【五福臨門 · 招財進寶組】RM 88",
+          desc: "含：金元寶造型肉乾 250g + 原味傳統肉乾 300g + 贈送 50g 招牌肉松（附贈燙金禮袋）",
+          btnText: "選購配套",
+          targetCategory: "新年禮盒配套"
+        },
+        {
+          id: "promo2",
+          tag: "送禮王牌",
+          title: "【金玉滿堂 · 團圓富貴禮盒】RM 148",
+          desc: "含：切片豬肉乾 500g + 金錢肉乾 250g + 精緻好酒臘腸 + 贈送 50g 肉松（立省 RM 14）",
+          btnText: "立即搶購",
+          targetCategory: "新年禮盒配套"
+        },
+        {
+          id: "promo3",
+          tag: "早鳥優惠碼",
+          title: "結帳輸入【JINYUAN88】折 RM 5",
+          desc: "消費滿 RM 50 即可折現！買年貨滿 RM 100 輸入【CNY2026】再享立減 RM 10！",
+          btnText: "前往選購",
+          targetCategory: "全部"
+        }
+      ],
+      coupons: [
+        { code: "JINYUAN88", desc: "早鳥立減 RM 5", type: "fixed", value: 5, minSpend: 50, active: true },
+        { code: "CNY2026", desc: "新年滿百立減 RM 10", type: "fixed", value: 10, minSpend: 100, active: true }
+      ],
+      memberRules: { welcomePoints: 50, pointsPerRm: 1, silverThreshold: 100, silverDiscountPct: 2, goldThreshold: 300, goldDiscountPct: 5, vipThreshold: 600, vipDiscountPct: 8 },
+      members: [
+        { id: "m1", name: "陳大文 (示範金卡會員)", phone: "0123456789", points: 350, joinDate: "2026-01-15" }
+      ],
+      orders: [],
+      products: [
+        {
+          id: "bundle-a",
+          name: "配套 A【五福臨門 · 招財進寶組】(買餅送肉松)",
+          category: "新年禮盒配套",
+          badge: "🔥 買餅即送50g肉松",
+          status: "instock",
+          desc: "內含：金元寶造型肉乾 250g + 原味傳統肉乾 300g + 🎁 免費贈送 50g 招牌豬肉松，附精美禮袋",
+          img: makeFoodSvg("五福臨門禮盒", "金元寶 + 原味肉乾 + 送50g肉松", "#991b1b", "#b45309"),
+          specs: [{ spec: "1 套裝", price: 88.00 }]
+        },
+        {
+          id: "bundle-b",
+          name: "配套 B【金玉滿堂 · 團圓富貴禮盒】(送禮首選)",
+          category: "新年禮盒配套",
+          badge: "省 RM 14 + 送肉松",
+          status: "instock",
+          desc: "內含：頂級切片豬肉乾 500g + 金錢肉乾 250g + 好酒臘腸 + 🎁 額外加贈 50g 招牌肉松",
+          img: makeFoodSvg("金玉滿堂禮盒", "切片500g + 金錢250g + 臘腸 + 送肉松", "#7f1d1d", "#92400e"),
+          specs: [{ spec: "雙層硬裝禮盒", price: 148.00 }]
+        },
+        {
+          id: "dry-orig",
+          name: "原味肉乾 (雞肉 / 豬肉) Original Dried Meat",
+          category: "傳統肉乾",
+          badge: "招牌人氣王",
+          status: "instock",
+          desc: "錦源招牌傳統炭烤風味，可選鮮嫩雞肉或甘甜豬肉，肉汁飽滿、炭香濃郁。",
+          img: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=700&q=80",
+          specs: [
+            { spec: "100g (豬肉)", price: 13.00 },
+            { spec: "300g (豬肉)", price: 40.00 },
+            { spec: "500g (豬肉)", price: 65.00 },
+            { spec: "100g (雞肉)", price: 13.00 },
+            { spec: "300g (雞肉)", price: 40.00 },
+            { spec: "500g (雞肉)", price: 65.00 }
+          ]
+        },
+        {
+          id: "dry-slice",
+          name: "切片豬肉乾 Slice Pork Dried Meat",
+          category: "傳統肉乾",
+          badge: "老饕首選",
+          status: "instock",
+          desc: "嚴選上等豬後腿原肉厚切烘烤，口感紮實有嚼勁，越嚼越香。",
+          img: "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?auto=format&fit=crop&w=700&q=80",
+          specs: [
+            { spec: "100g", price: 14.00 },
+            { spec: "300g", price: 43.00 },
+            { spec: "500g", price: 70.00 }
+          ]
+        },
+        {
+          id: "dry-pepper",
+          name: "黑胡椒豬肉乾 Black Pepper Pork Dried Meat",
+          category: "傳統肉乾",
+          badge: "辛香微辣",
+          status: "instock",
+          desc: "融合特選研磨黑胡椒粒與傳統炭火香氣，辛香微辣不膩口，配茶下酒一流。",
+          img: "https://images.unsplash.com/photo-1558030006-450675393462?auto=format&fit=crop&w=700&q=80",
+          specs: [
+            { spec: "100g", price: 13.60 },
+            { spec: "300g", price: 42.00 },
+            { spec: "500g", price: 68.00 }
+          ]
+        },
+        {
+          id: "dry-mala",
+          name: "麻辣豬肉乾 Mala Pork Dried Meat",
+          category: "傳統肉乾",
+          badge: "川味香麻",
+          status: "instock",
+          desc: "獨門川味花椒與辣椒秘製配方，香麻帶勁，肉香與椒麻在口中完美迸發。",
+          img: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=700&q=80",
+          specs: [
+            { spec: "100g", price: 13.60 },
+            { spec: "300g", price: 42.00 },
+            { spec: "500g", price: 68.00 }
+          ]
+        },
+        {
+          id: "pat-ingot",
+          name: "金元寶形肉乾 Gold Ingot Shape Dried Meat",
+          category: "造型肉乾",
+          badge: "招財好彩頭",
+          status: "instock",
+          desc: "飽滿立體金元寶造型肉乾，過年拜年擺盤、敬神或送禮最討喜，寓意招財進寶！",
+          img: makeFoodSvg("金元寶形肉乾", "Gold Ingot Shape · 250g RM 38", "#991b1b", "#d97706"),
+          specs: [{ spec: "250g 禮袋裝", price: 38.00 }]
+        },
+        {
+          id: "pat-coin",
+          name: "金錢肉乾 Coin Shape Dried Meat",
+          category: "造型肉乾",
+          badge: "財源滾滾",
+          status: "instock",
+          desc: "傳統銅錢造型肉乾，象徵財源廣進、富貴團圓，炭烤香氣十足。",
+          img: makeFoodSvg("金錢造型肉乾", "Coin Shape · 250g RM 38", "#881337", "#b45309"),
+          specs: [{ spec: "250g 禮袋裝", price: 38.00 }]
+        },
+        {
+          id: "floss-pork",
+          name: "特脆豬肉鬆 Pork Meat Floss",
+          category: "肉松系列",
+          badge: "買餅即送",
+          status: "instock",
+          desc: "嚴選新鮮豬瘦肉慢火炒製，金黃酥脆、入口即化，配粥夾麵包絕配。",
+          img: makeFoodSvg("特脆豬肉松", "Pork Meat Floss · 100g/250g", "#92400e", "#d97706"),
+          specs: [
+            { spec: "100g", price: 12.00 },
+            { spec: "250g", price: 30.00 }
+          ]
+        },
+        {
+          id: "sausage-wine",
+          name: "精緻好酒臘腸 Premium Wine Sausage",
+          category: "臘腸與臘肉",
+          badge: "頂級醇香",
+          status: "instock",
+          desc: "嚴選優質豬肉加上香醇好酒灌製，酒香濃郁、回味甘甜，煲仔飯與臘味飯靈魂。",
+          img: makeFoodSvg("精緻好酒臘腸", "Wine Sausage · 100g RM 12", "#6b1110", "#b45309"),
+          specs: [
+            { spec: "100g", price: 12.00 },
+            { spec: "500g", price: 60.00 }
+          ]
+        },
+        {
+          id: "bak-zhang",
+          name: "五香肉粽 Five Spice Bak Zhang",
+          category: "肉粽與月餅",
+          badge: "手工現包",
+          status: "instock",
+          desc: "傳統北馬五香鹹肉粽，糯米軟糯入味，內餡飽滿豐富。",
+          img: makeFoodSvg("傳統五香肉粽", "Five Spice Bak Zhang · 1粒 RM 11", "#3f6212", "#a16207"),
+          specs: [{ spec: "1 粒 (1 pcs)", price: 11.00 }]
+        }
+      ]
+    };
+
+    let storeData = loadStoreData();
+    let cart = JSON.parse(localStorage.getItem("JINYUAN_CART_V2") || "[]");
+    let currentCategory = "全部";
+    let searchKeyword = "";
+    let currentSlideIdx = 0;
+    let slideInterval = null;
+    let appliedCoupon = null;
+    let activeMember = null;
+    let currentAdminTab = "dashboard";
+
+    function loadStoreData() {
+      try {
+        const saved = localStorage.getItem("JINYUAN_SHOPIFY_CMS_V4");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed && parsed.products) return parsed;
+        }
+      } catch (e) {}
+      return JSON.parse(JSON.stringify(DEFAULT_STORE_DATA));
+    }
+
+    function saveStoreData() {
+      try {
+        localStorage.setItem("JINYUAN_SHOPIFY_CMS_V4", JSON.stringify(storeData));
+      } catch (e) {
+        showToast("⚠️ 照片容量較大，建議點擊「匯出更新後的 HTML」永久保存！");
+      }
+      renderStorefrontAll();
+      updateAdminBadges();
+    }
+
+    function saveCart() {
+      localStorage.setItem("JINYUAN_CART_V2", JSON.stringify(cart));
+      updateCartBadge();
+    }
+
+    function switchAppMode(mode) {
+      const storeView = document.getElementById("storefrontView");
+      const adminView = document.getElementById("adminCmsView");
+      const btnStore = document.getElementById("btnModeStore");
+      const btnAdmin = document.getElementById("btnModeAdmin");
+
+      if (mode === "admin") {
+        storeView.classList.add("hidden");
+        adminView.classList.remove("hidden");
+        btnAdmin.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-brand-red text-white shadow";
+        btnStore.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-stone-800 hover:bg-stone-700 text-stone-300";
+        renderAdminPanel();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } else {
+        adminView.classList.add("hidden");
+        storeView.classList.remove("hidden");
+        btnStore.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-brand-red text-white shadow";
+        btnAdmin.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-stone-800 hover:bg-stone-700 text-amber-300 border border-amber-500/30";
+        renderStorefrontAll();
+      }
+    }
+
+    function renderStorefrontAll() {
+      const s = storeData.settings;
+      document.getElementById("topAnnouncementText").innerText = s.announcement;
+      document.getElementById("headerStoreName").innerText = s.storeName;
+      document.getElementById("headerStoreSub").innerText = s.storeSubName;
+      document.getElementById("footerStoreName").innerText = s.storeFullName;
+      document.getElementById("footerContactPerson").innerText = "聯絡人：" + s.contactPerson;
+      document.getElementById("footerPhone").innerText = "WhatsApp / 電話：" + s.phoneDisplay;
+      document.getElementById("footerEmail").innerText = "電郵：" + s.email;
+      document.getElementById("footerAddress").innerText = "地址：" + s.address;
+
+      renderHeroSlides();
+      renderPromoCards();
+      renderCategoryTabs();
+      renderProductGrid();
+      updateCartBadge();
+    }
+
+    function renderHeroSlides() {
+      const container = document.getElementById("heroSlidesContainer");
+      const dots = document.getElementById("heroDotsContainer");
+      const slides = storeData.slides || [];
+      if (!slides.length) return;
+
+      if (currentSlideIdx >= slides.length) currentSlideIdx = 0;
+      const slide = slides[currentSlideIdx];
+
+      container.innerHTML = `
+        <div class="absolute inset-0">
+          <img src="${slide.img}" alt="${slide.title}" class="w-full h-full object-cover opacity-35">
+          <div class="absolute inset-0 bg-gradient-to-r from-brand-dark via-brand-dark/90 to-transparent"></div>
+        </div>
+        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
+          <div class="max-w-2xl animate-fade">
+            <span class="inline-block px-3 py-1 rounded-full bg-amber-400/20 border border-amber-300/40 text-amber-300 text-xs font-bold tracking-widest">${slide.eyebrow}</span>
+            <h1 class="font-serif text-3xl sm:text-5xl font-black text-white mt-4 leading-tight">${slide.title}</h1>
+            <p class="text-sm sm:text-base text-amber-100/90 mt-4 leading-relaxed">${slide.subtitle}</p>
+            <div class="mt-6 flex flex-wrap gap-3">
+              <a href="#productsSection" onclick="setCategory('${slide.ctaCategory}')" class="px-6 py-3.5 rounded-full bg-brand-red hover:bg-brand-darkred text-white font-black text-xs sm:text-sm shadow-lg transition">
+                ${slide.ctaText} ➔
+              </a>
+              <button onclick="switchAppMode('admin'); switchAdminTab('settings')" class="px-4 py-3.5 rounded-full bg-white/10 hover:bg-white/20 text-amber-200 font-bold text-xs backdrop-blur-sm transition">
+                ⚙️ 後台更換橫幅
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      dots.innerHTML = slides.map((_, i) => `
+        <button onclick="goToSlide(${i})" class="h-2.5 rounded-full transition-all ${i === currentSlideIdx ? 'w-8 bg-amber-400' : 'w-2.5 bg-white/40 hover:bg-white/70'}"></button>
+      `).join("");
+    }
+
+    function goToSlide(idx) {
+      currentSlideIdx = idx;
+      renderHeroSlides();
+    }
+
+    let heroStartX = 0;
+    function onHeroDragStart(e) { heroStartX = e.clientX || (e.touches && e.touches[0].clientX) || 0; }
+    function onHeroDragMove(e) {}
+    function onHeroDragEnd(e) {
+      const endX = e.clientX || (e.changedTouches && e.changedTouches[0].clientX) || heroStartX;
+      const diff = endX - heroStartX;
+      const slides = storeData.slides || [];
+      if (Math.abs(diff) > 50 && slides.length > 1) {
+        if (diff > 0) {
+          currentSlideIdx = (currentSlideIdx - 1 + slides.length) % slides.length;
+        } else {
+          currentSlideIdx = (currentSlideIdx + 1) % slides.length;
+        }
+        renderHeroSlides();
+      }
+    }
+
+    function renderPromoCards() {
+      const grid = document.getElementById("promoCardsGrid");
+      const promos = storeData.promotions || [];
+      const bgStyles = ["from-brand-red to-brand-darkred", "from-stone-900 to-amber-950", "from-amber-800 to-brand-dark"];
+
+      grid.innerHTML = promos.map((p, idx) => `
+        <div class="bg-gradient-to-br ${bgStyles[idx % bgStyles.length]} text-white rounded-2xl p-6 shadow-md flex flex-col justify-between border border-amber-400/20">
+          <div>
+            <span class="inline-block px-2.5 py-0.5 rounded-md bg-amber-400 text-brand-dark font-black text-[11px]">${p.tag}</span>
+            <h3 class="font-serif text-xl font-black mt-3">${p.title}</h3>
+            <p class="text-xs text-amber-100/90 mt-2 leading-relaxed">${p.desc}</p>
+          </div>
+          <div class="mt-5 pt-3 border-t border-white/10 flex items-center justify-between">
+            <a href="#productsSection" onclick="setCategory('${p.targetCategory || '全部'}')" class="px-4 py-2 rounded-full bg-amber-100 hover:bg-white text-brand-dark font-black text-xs transition">
+              ${p.btnText || '立即查看'} →
+            </a>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function getCategoriesList() {
+      const baseCats = ["全部", "新年禮盒配套", "傳統肉乾", "造型肉乾", "小造型肉乾", "肉松系列", "臘腸與臘肉", "肉粽與月餅"];
+      storeData.products.forEach(p => {
+        if (p.category && !baseCats.includes(p.category)) baseCats.push(p.category);
+      });
+      return baseCats;
+    }
+
+    function renderCategoryTabs() {
+      const bar = document.getElementById("categoryFilterBar");
+      const cats = getCategoriesList();
+      bar.innerHTML = cats.map(c => {
+        const count = c === "全部" ? storeData.products.length : storeData.products.filter(p => p.category === c).length;
+        const active = currentCategory === c;
+        return `
+          <button onclick="setCategory('${c}')" class="px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 ${
+            active ? 'bg-brand-red text-white shadow-md' : 'bg-white hover:bg-amber-50 text-stone-700 border border-stone-200'
+          }">
+            <span>${c}</span>
+            <span class="px-1.5 py-0.2 rounded-full text-[10px] ${active ? 'bg-white/20 text-white' : 'bg-stone-100 text-stone-500'}">${count}</span>
+          </button>
+        `;
+      }).join("");
+    }
+
+    function setCategory(cat) {
+      currentCategory = cat;
+      renderCategoryTabs();
+      renderProductGrid();
+    }
+
+    function handleSearchInput(val) {
+      searchKeyword = (val || "").trim().toLowerCase();
+      renderProductGrid();
+    }
+
+    function renderProductGrid() {
+      const grid = document.getElementById("storeProductGrid");
+      let list = storeData.products.filter(p => {
+        const matchCat = currentCategory === "全部" || p.category === currentCategory;
+        const matchSearch = !searchKeyword ||
+          p.name.toLowerCase().includes(searchKeyword) ||
+          (p.desc && p.desc.toLowerCase().includes(searchKeyword)) ||
+          (p.category && p.category.toLowerCase().includes(searchKeyword));
+        return matchCat && matchSearch;
+      });
+
+      if (!list.length) {
+        grid.innerHTML = `
+          <div class="col-span-full bg-white rounded-2xl p-12 text-center border border-stone-200">
+            <p class="text-base font-bold text-stone-600">找不到符合條件的商品</p>
+            <button onclick="setCategory('全部'); handleSearchInput('')" class="mt-3 px-4 py-2 rounded-full bg-brand-red text-white text-xs font-bold">顯示全部商品</button>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = list.map(p => {
+        const specs = p.specs && p.specs.length ? p.specs : [{ spec: "標準規格", price: 0 }];
+        const firstSpec = specs[0];
+        const isInquire = p.status === "inquire" || firstSpec.price === 0;
+        const isSoldOut = p.status === "soldout";
+
+        return `
+          <div class="bg-white rounded-2xl border border-amber-900/10 overflow-hidden shadow-sm hover:shadow-xl transition flex flex-col group">
+            <div class="relative h-48 bg-stone-100 overflow-hidden">
+              <img src="${p.img}" alt="${p.name}" onerror="this.src=makeFoodSvg('${p.name.slice(0,8)}','錦源傳統肉乾')" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+              ${p.badge ? `<span class="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-brand-red text-amber-100 font-black text-[11px] shadow">${p.badge}</span>` : ''}
+              <button onclick="openProductModal('${p.id}')" title="店長快速換圖/改價" class="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-black/70 hover:bg-black text-amber-300 text-[11px] font-bold backdrop-blur-sm opacity-90 hover:opacity-100 transition">
+                ✏️ 換圖/改價
+              </button>
+            </div>
+
+            <div class="p-4 flex-1 flex flex-col">
+              <div class="text-[11px] font-bold text-amber-800">${p.category}</div>
+              <h3 class="font-bold text-base text-brand-dark mt-0.5 leading-snug">${p.name}</h3>
+              <p class="text-xs text-stone-500 mt-1.5 line-clamp-2 leading-relaxed">${p.desc || ''}</p>
+
+              <div class="mt-3 pt-3 border-t border-stone-100">
+                <label class="text-[11px] font-bold text-stone-600 block mb-1">選擇重量 / 規格：</label>
+                <select id="spec-sel-${p.id}" onchange="onProductCardSpecChange('${p.id}')" class="w-full px-3 py-2 rounded-xl border border-stone-300 bg-amber-50/50 text-xs font-bold text-brand-dark focus:outline-none focus:border-brand-red">
+                  ${specs.map((s, idx) => `
+                    <option value="${idx}">${s.spec} ${s.price > 0 ? '— RM ' + Number(s.price).toFixed(2) : '(WhatsApp 詢價)'}</option>
+                  `).join("")}
+                </select>
+              </div>
+
+              <div class="mt-4 pt-2 flex items-center justify-between gap-2 mt-auto">
+                <div>
+                  <span class="text-[10px] text-stone-400 block">售價</span>
+                  <span id="price-lbl-${p.id}" class="font-serif text-xl font-black text-brand-red">
+                    ${isInquire ? '季節詢價' : 'RM ' + Number(firstSpec.price).toFixed(2)}
+                  </span>
+                </div>
+
+                ${
+                  isSoldOut
+                    ? `<button disabled class="px-4 py-2.5 rounded-xl bg-stone-300 text-stone-600 font-bold text-xs cursor-not-allowed">暫時售罄</button>`
+                    : isInquire
+                    ? `<button onclick="inquireProductWhatsApp('${p.id}')" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow transition">💬 WhatsApp 預訂</button>`
+                    : `<button onclick="addProductToCart('${p.id}')" class="px-4 py-2.5 rounded-xl bg-brand-red hover:bg-brand-darkred text-white font-bold text-xs shadow-md transition active:scale-95">＋ 加入購物車</button>`
+                }
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function onProductCardSpecChange(prodId) {
+      const p = storeData.products.find(x => x.id === prodId);
+      const sel = document.getElementById(`spec-sel-${prodId}`);
+      const lbl = document.getElementById(`price-lbl-${prodId}`);
+      if (!p || !sel || !lbl) return;
+      const chosen = p.specs[Number(sel.value)] || p.specs[0];
+      lbl.innerText = chosen.price > 0 ? `RM ${Number(chosen.price).toFixed(2)}` : "季節詢價";
+    }
+
+    function inquireProductWhatsApp(prodId) {
+      const p = storeData.products.find(x => x.id === prodId);
+      if (!p) return;
+      const wa = storeData.settings.whatsappNumber || "60124947842";
+      const text = `您好錦源王女士，我想查詢預訂：【${p.name}】`;
+      window.open(`https://wa.me/${wa}?text=${encodeURIComponent(text)}`, "_blank");
+    }
+
+    function addProductToCart(prodId) {
+      const p = storeData.products.find(x => x.id === prodId);
+      if (!p) return;
+      const sel = document.getElementById(`spec-sel-${prodId}`);
+      const specIdx = sel ? Number(sel.value) : 0;
+      const chosenSpec = p.specs[specIdx] || p.specs[0];
+
+      const cartKey = `${p.id}__${chosenSpec.spec}`;
+      const existing = cart.find(item => item.cartKey === cartKey);
+      if (existing) {
+        existing.qty += 1;
+      } else {
+        cart.push({
+          cartKey,
+          prodId: p.id,
+          name: p.name,
+          spec: chosenSpec.spec,
+          price: Number(chosenSpec.price),
+          img: p.img,
+          qty: 1
+        });
+      }
+      saveCart();
+      renderCartDrawer();
+      showToast(`✅ 已加入：${p.name} (${chosenSpec.spec})`);
+    }
+
+    function updateCartBadge() {
+      const count = cart.reduce((acc, item) => acc + item.qty, 0);
+      const badge = document.getElementById("navCartBadge");
+      if (badge) badge.innerText = count;
+    }
+
+    function openCartDrawer() {
+      document.getElementById("cartOverlay").classList.remove("hidden");
+      document.getElementById("cartDrawer").classList.remove("translate-x-full");
+      renderCartDrawer();
+    }
+
+    function closeCartDrawer() {
+      document.getElementById("cartOverlay").classList.add("hidden");
+      document.getElementById("cartDrawer").classList.add("translate-x-full");
+    }
+
+    function changeCartQty(cartKey, delta) {
+      const item = cart.find(x => x.cartKey === cartKey);
+      if (!item) return;
+      item.qty += delta;
+      if (item.qty <= 0) {
+        cart = cart.filter(x => x.cartKey !== cartKey);
+      }
+      saveCart();
+      renderCartDrawer();
+    }
+
+    function applyCartCoupon() {
+      const input = document.getElementById("cartCouponInput").value.trim().toUpperCase();
+      const feedback = document.getElementById("cartCouponFeedback");
+      const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+
+      const found = (storeData.coupons || []).find(c => c.code.toUpperCase() === input && c.active);
+      if (!found) {
+        appliedCoupon = null;
+        feedback.innerText = "❌ 找不到此優惠碼或已停用";
+        feedback.className = "text-[11px] mt-1 font-bold text-red-600";
+      } else if (subtotal < found.minSpend) {
+        appliedCoupon = null;
+        feedback.innerText = `⚠️ 需消費滿 RM ${found.minSpend} 方可使用`;
+        feedback.className = "text-[11px] mt-1 font-bold text-amber-700";
+      } else {
+        appliedCoupon = found;
+        feedback.innerText = `✅ 已套用【${found.code}】：${found.desc}`;
+        feedback.className = "text-[11px] mt-1 font-bold text-emerald-700";
+      }
+      renderCartDrawer();
+    }
+
+    function getMemberTierInfo(points) {
+      const r = storeData.memberRules;
+      if (points >= r.vipThreshold) return { tierName: "至尊 VIP", discountPct: r.vipDiscountPct };
+      if (points >= r.goldThreshold) return { tierName: "金卡會員", discountPct: r.goldDiscountPct };
+      if (points >= r.silverThreshold) return { tierName: "銀卡會員", discountPct: r.silverDiscountPct };
+      return { tierName: "一般會員", discountPct: 0 };
+    }
+
+    function lookupCartMember(phoneVal) {
+      const clean = (phoneVal || "").replace(/\D/g, "");
+      const feedback = document.getElementById("cartMemberFeedback");
+      if (!clean || clean.length < 6) {
+        activeMember = null;
+        feedback.innerText = "";
+        renderCartDrawer();
+        return;
+      }
+      const found = (storeData.members || []).find(m => m.phone.replace(/\D/g, "") === clean);
+      if (found) {
+        activeMember = found;
+        const tier = getMemberTierInfo(found.points);
+        document.getElementById("orderBuyerName").value = document.getElementById("orderBuyerName").value || found.name;
+        document.getElementById("orderBuyerPhone").value = document.getElementById("orderBuyerPhone").value || found.phone;
+        feedback.innerText = `👑 歡迎 ${found.name} (${tier.tierName} · ${found.points}分)！`;
+      } else {
+        activeMember = null;
+        feedback.innerText = "💡 下單後將自動為您登記會員並累積積分！";
+      }
+      renderCartDrawer();
+    }
+
+    function calculateCartTotals() {
+      const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+      let couponDisc = 0;
+      if (appliedCoupon && subtotal >= appliedCoupon.minSpend) {
+        couponDisc = appliedCoupon.type === "percent" ? subtotal * (appliedCoupon.value / 100) : appliedCoupon.value;
+      }
+      let memberDisc = 0;
+      let tierInfo = { tierName: "訪客", discountPct: 0 };
+      if (activeMember) {
+        tierInfo = getMemberTierInfo(activeMember.points);
+        if (tierInfo.discountPct > 0) memberDisc = (subtotal - couponDisc) * (tierInfo.discountPct / 100);
+      }
+      const finalTotal = Math.max(0, subtotal - couponDisc - memberDisc);
+      const earnedPoints = Math.floor(finalTotal * (storeData.memberRules.pointsPerRm || 1));
+      return { subtotal, couponDisc, memberDisc, finalTotal, earnedPoints, tierInfo };
+    }
+
+    function renderCartDrawer() {
+      const listEl = document.getElementById("cartItemsList");
+      const breakdownEl = document.getElementById("cartPriceBreakdown");
+
+      if (!cart.length) {
+        listEl.innerHTML = `<div class="text-center py-10 text-stone-400"><div class="text-3xl mb-2">🛒</div><p class="font-bold text-stone-600">您的購物車是空的</p></div>`;
+        breakdownEl.innerHTML = `<div class="flex justify-between font-black text-base text-brand-dark"><span>應付總計</span><span>RM 0.00</span></div>`;
+        return;
+      }
+
+      listEl.innerHTML = cart.map(item => `
+        <div class="flex items-center gap-3 bg-stone-50 p-2.5 rounded-xl border border-stone-200">
+          <img src="${item.img}" class="w-14 h-14 rounded-lg object-cover bg-white border border-stone-200 shrink-0">
+          <div class="flex-1 min-w-0">
+            <h4 class="font-bold text-xs text-stone-900 truncate">${item.name}</h4>
+            <p class="text-[11px] text-amber-800 font-medium">${item.spec} · RM ${item.price.toFixed(2)}</p>
+            <div class="flex items-center gap-2 mt-1.5">
+              <button onclick="changeCartQty('${item.cartKey}', -1)" class="w-6 h-6 rounded bg-white border border-stone-300 font-bold text-xs">-</button>
+              <span class="font-bold text-xs w-5 text-center">${item.qty}</span>
+              <button onclick="changeCartQty('${item.cartKey}', 1)" class="w-6 h-6 rounded bg-white border border-stone-300 font-bold text-xs">+</button>
+              <span class="ml-auto font-black text-xs text-brand-red">RM ${(item.price * item.qty).toFixed(2)}</span>
+            </div>
+          </div>
+        </div>
+      `).join("");
+
+      const t = calculateCartTotals();
+      breakdownEl.innerHTML = `
+        <div class="flex justify-between"><span>商品小計 (含贈送50g肉松)</span><span>RM ${t.subtotal.toFixed(2)}</span></div>
+        ${t.couponDisc > 0 ? `<div class="flex justify-between text-emerald-700 font-bold"><span>優惠碼折扣</span><span>- RM ${t.couponDisc.toFixed(2)}</span></div>` : ''}
+        ${t.memberDisc > 0 ? `<div class="flex justify-between text-amber-800 font-bold"><span>會員折扣</span><span>- RM ${t.memberDisc.toFixed(2)}</span></div>` : ''}
+        <div class="flex justify-between font-black text-base text-brand-red pt-1.5 border-t border-stone-200">
+          <span>應付總計</span>
+          <span>RM ${t.finalTotal.toFixed(2)}</span>
+        </div>
+        <div class="text-[11px] text-stone-500 text-right">預計可獲會員積分：<b>+${t.earnedPoints} pts</b></div>
+      `;
+    }
+
+    function submitWhatsAppOrder() {
+      if (!cart.length) {
+        showToast("⚠️ 請先將商品加入購物車！");
+        return;
+      }
+      const name = document.getElementById("orderBuyerName").value.trim();
+      const phone = document.getElementById("orderBuyerPhone").value.trim();
+      const delivery = document.getElementById("orderDeliveryMethod").value;
+      const address = document.getElementById("orderBuyerAddress").value.trim();
+
+      if (!name || !phone) {
+        showToast("⚠️ 請填寫姓名與 WhatsApp 電話！");
+        return;
+      }
+
+      const t = calculateCartTotals();
+      const orderId = "JY" + Date.now().toString().slice(-6);
+
+      const cleanPhone = phone.replace(/\D/g, "");
+      let mem = (storeData.members || []).find(m => m.phone.replace(/\D/g, "") === cleanPhone);
+      if (mem) {
+        mem.points += t.earnedPoints;
+      } else {
+        mem = { id: "m_" + Date.now(), name, phone, points: 50 + t.earnedPoints, joinDate: new Date().toISOString().slice(0, 10) };
+        storeData.members.unshift(mem);
+      }
+
+      storeData.orders.unshift({
+        id: orderId,
+        date: new Date().toLocaleString("zh-MY"),
+        customerName: name,
+        customerPhone: phone,
+        deliveryMethod: delivery,
+        address: address || "(未填寫備註)",
+        items: cart.map(i => ({ name: i.name, spec: i.spec, qty: i.qty, price: i.price })),
+        total: t.finalTotal,
+        status: "待確認"
+      });
+      saveStoreData();
+
+      const lines = [
+        `🧧 *【${storeData.settings.storeFullName} - 網店新訂單】*`,
+        `訂單編號：#${orderId}`,
+        `--------------------------`,
+        `👤 顧客姓名：${name}`,
+        `📞 聯絡電話：${phone}`,
+        `🚚 取貨方式：${delivery}`,
+        address ? `📍 地址/備註：${address}` : null,
+        `--------------------------`,
+        `🛒 *訂購明細 (含買餅免費送50g肉松)：*`
+      ];
+      cart.forEach(item => {
+        lines.push(`• ${item.name} [${item.spec}] × ${item.qty} = RM ${(item.price * item.qty).toFixed(2)}`);
+      });
+      lines.push(`--------------------------`);
+      lines.push(`商品小計：RM ${t.subtotal.toFixed(2)}`);
+      if (t.couponDisc > 0) lines.push(`優惠折扣：-RM ${t.couponDisc.toFixed(2)}`);
+      lines.push(`💰 *應付總金額：RM ${t.finalTotal.toFixed(2)}*`);
+      lines.push(`🎁 *(享有買餅贈送 50g 招牌肉松活動)*`);
+      lines.push(`\n請王女士協助確認庫存與郵費，謝謝！`);
+
+      const waNum = (storeData.settings.whatsappNumber || "60124947842").replace(/\D/g, "");
+      window.open(`https://wa.me/${waNum}?text=${encodeURIComponent(lines.filter(Boolean).join("\n"))}`, "_blank");
+
+      cart = [];
+      saveCart();
+      closeCartDrawer();
+      showToast("🎉 訂單已發送至 WhatsApp！");
+    }
+
+    function openMemberModal() { document.getElementById("memberModalOverlay").classList.remove("hidden"); }
+    function closeMemberModal() { document.getElementById("memberModalOverlay").classList.add("hidden"); }
+
+    function registerOrLoginMember() {
+      const name = document.getElementById("memModalName").value.trim();
+      const phone = document.getElementById("memModalPhone").value.trim();
+      const clean = phone.replace(/\D/g, "");
+      if (!clean || clean.length < 7) { showToast("⚠️ 請輸入手機號碼！"); return; }
+
+      let mem = storeData.members.find(m => m.phone.replace(/\D/g, "") === clean);
+      if (!mem) {
+        mem = { id: "m_" + Date.now(), name: name || "錦源貴賓", phone, points: 50, joinDate: new Date().toISOString().slice(0, 10) };
+        storeData.members.unshift(mem);
+        saveStoreData();
+      }
+      activeMember = mem;
+      document.getElementById("navMemberLabel").innerText = `${mem.name} (${mem.points}分)`;
+      const tier = getMemberTierInfo(mem.points);
+      const cardEl = document.getElementById("memberCardDisplay");
+      cardEl.classList.remove("hidden");
+      cardEl.innerHTML = `
+        <div class="bg-gradient-to-br from-brand-dark to-brand-red text-white p-4 rounded-2xl shadow-lg mt-2">
+          <span class="px-2 py-0.5 rounded bg-amber-400 text-brand-dark font-black text-[10px]">${tier.tierName}</span>
+          <h4 class="font-bold text-base mt-1">${mem.name} (${mem.points} pts)</h4>
+        </div>
+      `;
+    }
+
+    function updateAdminBadges() {
+      document.getElementById("adminProdCountBadge").innerText = storeData.products.length;
+      document.getElementById("adminMemberCountBadge").innerText = storeData.members.length;
+      document.getElementById("adminOrderCountBadge").innerText = storeData.orders.length;
+    }
+
+    function switchAdminTab(tab) {
+      currentAdminTab = tab;
+      document.querySelectorAll(".admin-nav-btn").forEach(btn => {
+        btn.className = btn.dataset.tab === tab
+          ? "admin-nav-btn w-full text-left px-3.5 py-2.5 rounded-xl flex items-center justify-between transition bg-brand-red text-white shadow"
+          : "admin-nav-btn w-full text-left px-3.5 py-2.5 rounded-xl flex items-center justify-between transition hover:bg-stone-100 text-stone-700";
+      });
+      renderAdminPanel();
+    }
+
+    function renderAdminPanel() {
+      updateAdminBadges();
+      const panel = document.getElementById("adminMainPanel");
+      if (!panel) return;
+
+      if (currentAdminTab === "dashboard") {
+        panel.innerHTML = `
+          <div class="space-y-6 animate-fade">
+            <h2 class="text-xl font-black text-stone-900">📊 錦源 Shopify 店長營運儀表板</h2>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div class="bg-amber-50 p-4 rounded-2xl border border-amber-200"><b>上架商品</b><span class="text-2xl font-black text-brand-red block mt-1">${storeData.products.length} 款</span></div>
+              <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-200"><b>累計訂單</b><span class="text-2xl font-black text-emerald-700 block mt-1">${storeData.orders.length} 筆</span></div>
+              <div class="bg-stone-100 p-4 rounded-2xl border border-stone-200"><b>登記會員</b><span class="text-2xl font-black text-stone-900 block mt-1">${storeData.members.length} 人</span></div>
+              <div class="bg-purple-50 p-4 rounded-2xl border border-purple-200"><b>促銷活動</b><span class="text-2xl font-black text-purple-800 block mt-1">買餅送50g肉松</span></div>
+            </div>
+            <div class="p-4 bg-amber-50 rounded-xl text-xs text-amber-900 font-bold">
+              💡 提示：您隨時可以在「商品與價格管理」中修改價錢或更換照片，改好後點擊頂部「💾 匯出更新後的 HTML」即可下載最新檔案！
+            </div>
+          </div>
+        `;
+      } else if (currentAdminTab === "products") {
+        panel.innerHTML = `
+          <div class="space-y-4 animate-fade">
+            <div class="flex justify-between items-center border-b pb-4">
+              <h2 class="text-xl font-black text-stone-900">🥩 商品與多規格價格管理</h2>
+              <button onclick="openProductModal()" class="px-4 py-2 rounded-xl bg-brand-red text-white text-xs font-black">＋ 新增商品</button>
+            </div>
+            <div class="space-y-2.5">
+              ${storeData.products.map(p => `
+                <div class="flex items-center justify-between p-3 rounded-xl border bg-white">
+                  <div class="flex items-center gap-3">
+                    <img src="${p.img}" class="w-14 h-14 rounded-xl object-cover border bg-stone-100">
+                    <div>
+                      <span class="text-[10px] font-bold text-amber-800">${p.category}</span>
+                      <h4 class="font-bold text-sm">${p.name}</h4>
+                      <p class="text-xs text-brand-red font-bold">${(p.specs || []).map(s => `${s.spec}: RM ${Number(s.price).toFixed(2)}`).join(" | ")}</p>
+                    </div>
+                  </div>
+                  <div class="flex gap-2">
+                    <button onclick="openProductModal('${p.id}')" class="px-3 py-1.5 rounded-lg bg-amber-500 text-stone-950 font-black text-xs">✏️ 換圖/改價</button>
+                    <button onclick="storeData.products = storeData.products.filter(x=>x.id!=='${p.id}');saveStoreData();renderAdminPanel()" class="px-2.5 py-1.5 rounded-lg bg-red-100 text-red-600 font-bold text-xs">刪除</button>
+                  </div>
+                </div>
+              `).join("")}
+            </div>
+          </div>
+        `;
+      } else if (currentAdminTab === "promotions") {
+        panel.innerHTML = `
+          <div class="space-y-4 animate-fade text-xs">
+            <h2 class="text-xl font-black text-stone-900">🎁 促銷活動與「買餅送肉松」設定</h2>
+            <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl space-y-2">
+              <b class="text-brand-red text-sm">目前主打促銷：買餅即送 50g 招牌肉松</b>
+              <p class="text-stone-600">顧客選購任意傳統年餅、切片肉乾或禮盒，系統與購物車均會自動標註附贈 50g 肉松，大幅提高成交率。</p>
+            </div>
+            <div class="space-y-2">
+              ${storeData.promotions.map((pr, idx) => `
+                <div class="bg-white p-3 rounded-xl border space-y-1">
+                  <input type="text" value="${pr.title}" onchange="storeData.promotions[${idx}].title=this.value;saveStoreData()" class="w-full px-2 py-1 border rounded font-bold">
+                  <input type="text" value="${pr.desc}" onchange="storeData.promotions[${idx}].desc=this.value;saveStoreData()" class="w-full px-2 py-1 border rounded">
+                </div>
+              `).join("")}
+            </div>
+          </div>
+        `;
+      } else if (currentAdminTab === "members") {
+        panel.innerHTML = `
+          <div class="space-y-4 animate-fade text-xs">
+            <h2 class="text-xl font-black text-stone-900">👑 會員積分與名單管理</h2>
+            <div class="space-y-2">
+              ${!storeData.members.length ? '<p class="text-stone-400">尚無會員登記紀錄</p>' : storeData.members.map(m => `
+                <div class="p-3 rounded-xl border bg-white flex justify-between items-center">
+                  <div><b>${m.name}</b> (${m.phone})</div>
+                  <div class="font-bold text-brand-red">${m.points} pts</div>
+                </div>
+              `).join("")}
+            </div>
+          </div>
+        `;
+      } else if (currentAdminTab === "orders") {
+        panel.innerHTML = `
+          <div class="space-y-4 animate-fade text-xs">
+            <h2 class="text-xl font-black text-stone-900">📦 顧客訂單紀錄</h2>
+            ${!storeData.orders.length ? '<p class="text-stone-400">目前尚無訂單紀錄</p>' : storeData.orders.map(o => `
+              <div class="p-3 rounded-xl border bg-white space-y-1">
+                <div class="flex justify-between font-bold"><span>#${o.id} - ${o.customerName}</span><span class="text-brand-red">RM ${Number(o.total).toFixed(2)}</span></div>
+                <p class="text-stone-600">${o.deliveryMethod} | ${o.customerPhone}</p>
+              </div>
+            `).join("")}
+          </div>
+        `;
+      } else if (currentAdminTab === "settings") {
+        const s = storeData.settings;
+        panel.innerHTML = `
+          <div class="space-y-4 animate-fade text-xs">
+            <h2 class="text-xl font-black text-stone-900">🏪 店鋪設定與備份</h2>
+            <div>
+              <label class="font-bold block mb-1">跑馬燈公告文字</label>
+              <input type="text" value="${s.announcement}" onchange="storeData.settings.announcement=this.value;saveStoreData()" class="w-full px-3 py-2 border rounded">
+            </div>
+            <div>
+              <label class="font-bold block mb-1">接單 WhatsApp 號碼</label>
+              <input type="text" value="${s.whatsappNumber}" onchange="storeData.settings.whatsappNumber=this.value;saveStoreData()" class="w-full px-3 py-2 border rounded font-bold text-emerald-700">
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function openProductModal(prodId = "") {
+      document.getElementById("productModalOverlay").classList.remove("hidden");
+      const p = storeData.products.find(x => x.id === prodId);
+      if (p) {
+        document.getElementById("productModalTitle").innerText = `✏️ 編輯商品：${p.name}`;
+        document.getElementById("editProdId").value = p.id;
+        document.getElementById("editProdName").value = p.name;
+        document.getElementById("editProdCategory").value = p.category;
+        document.getElementById("editProdBadge").value = p.badge || "";
+        document.getElementById("editProdStatus").value = p.status || "instock";
+        document.getElementById("editProdDesc").value = p.desc || "";
+        document.getElementById("editProdImgUrl").value = p.img || "";
+        document.getElementById("editProdImgPreview").src = p.img || "";
+        const container = document.getElementById("editProdSpecsContainer");
+        container.innerHTML = "";
+        (p.specs || []).forEach(s => addSpecRowInModal(s.spec, s.price));
+      } else {
+        document.getElementById("productModalTitle").innerText = "＋ 新增商品";
+        document.getElementById("editProdId").value = "";
+        document.getElementById("editProdName").value = "";
+        document.getElementById("editProdCategory").value = "傳統肉乾";
+        document.getElementById("editProdBadge").value = "🔥 買餅送肉松";
+        document.getElementById("editProdStatus").value = "instock";
+        document.getElementById("editProdDesc").value = "";
+        const defaultSvg = makeFoodSvg("錦源新商品", "古法炭烤");
+        document.getElementById("editProdImgUrl").value = defaultSvg;
+        document.getElementById("editProdImgPreview").src = defaultSvg;
+        const container = document.getElementById("editProdSpecsContainer");
+        container.innerHTML = "";
+        addSpecRowInModal("100g", 13.00);
+        addSpecRowInModal("300g", 40.00);
+        addSpecRowInModal("500g", 65.00);
+      }
+    }
+
+    function closeProductModal() { document.getElementById("productModalOverlay").classList.add("hidden"); }
+
+    function addSpecRowInModal(specName = "", priceVal = 15) {
+      const container = document.getElementById("editProdSpecsContainer");
+      const row = document.createElement("div");
+      row.className = "flex items-center gap-2 spec-edit-row";
+      row.innerHTML = `
+        <input type="text" value="${specName}" placeholder="規格 (如 100g)" class="spec-name-input flex-1 px-3 py-1.5 rounded-lg border bg-white">
+        <span class="text-stone-500 font-bold">RM</span>
+        <input type="number" step="0.1" value="${priceVal}" class="spec-price-input w-28 px-3 py-1.5 rounded-lg border bg-white font-bold text-brand-red">
+        <button type="button" onclick="this.parentElement.remove()" class="px-2.5 py-1.5 rounded-lg bg-stone-200 text-red-600 font-bold">×</button>
+      `;
+      container.appendChild(row);
+    }
+
+    function handleProductImageUpload(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement("canvas");
+          const MAX_W = 700;
+          const scale = img.width > MAX_W ? MAX_W / img.width : 1;
+          canvas.width = Math.round(img.width * scale);
+          canvas.height = Math.round(img.height * scale);
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          const dataUrl = canvas.toDataURL("image/jpeg", 0.82);
+          document.getElementById("editProdImgPreview").src = dataUrl;
+          document.getElementById("editProdImgUrl").value = dataUrl;
+          showToast("📸 照片上傳成功！");
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function saveProductFromModal() {
+      const id = document.getElementById("editProdId").value;
+      const name = document.getElementById("editProdName").value.trim();
+      const category = document.getElementById("editProdCategory").value;
+      const badge = document.getElementById("editProdBadge").value.trim();
+      const status = document.getElementById("editProdStatus").value;
+      const desc = document.getElementById("editProdDesc").value.trim();
+      const img = document.getElementById("editProdImgUrl").value.trim() || makeFoodSvg(name.slice(0, 8), category);
+
+      if (!name) { showToast("⚠️ 請輸入商品名稱！"); return; }
+
+      const specRows = document.querySelectorAll("#editProdSpecsContainer .spec-edit-row");
+      const specs = [];
+      specRows.forEach(r => {
+        const sName = r.querySelector(".spec-name-input").value.trim();
+        const sPrice = parseFloat(r.querySelector(".spec-price-input").value) || 0;
+        if (sName) specs.push({ spec: sName, price: sPrice });
+      });
+      if (!specs.length) specs.push({ spec: "標準規格", price: 15.00 });
+
+      if (id) {
+        const idx = storeData.products.findIndex(x => x.id === id);
+        if (idx > -1) storeData.products[idx] = { id, name, category, badge, status, desc, img, specs };
+      } else {
+        storeData.products.unshift({ id: "prod_" + Date.now(), name, category, badge, status, desc, img, specs });
+      }
+
+      saveStoreData();
+      closeProductModal();
+      if (!document.getElementById("adminCmsView").classList.contains("hidden")) renderAdminPanel();
+      showToast("✅ 商品已成功儲存！");
+    }
+
+    function exportUpdatedHTML() {
+      try {
+        const cloneDoc = document.documentElement.cloneNode(true);
+        const scriptEl = cloneDoc.querySelector("#jinYuanInitialDataScript");
+        if (scriptEl) {
+          const currentJson = JSON.stringify(storeData, null, 2);
+          scriptEl.textContent = scriptEl.textContent.replace(
+            /const DEFAULT_STORE_DATA = \{[\s\S]*?\n    \};/,
+            `const DEFAULT_STORE_DATA = ${currentJson};`
+          );
+        }
+        const finalHtml = "<!doctype html>\n" + cloneDoc.outerHTML;
+        const blob = new Blob([finalHtml], { type: "text/html;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `錦源肉乾_最新網店系統_${new Date().toISOString().slice(0, 10)}.html`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast("💾 網店 HTML 檔案已成功下載！");
+      } catch (err) {
+        showToast("⚠️ 匯出失敗，請再試一次");
+      }
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById("appToast");
+      if (!t) return;
+      t.innerText = msg;
+      t.style.opacity = "1";
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => { t.style.opacity = "0"; }, 3000);
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      renderStorefrontAll();
+      updateAdminBadges();
+      slideInterval = setInterval(() => {
+        if (storeData.slides && storeData.slides.length > 1) {
+          currentSlideIdx = (currentSlideIdx + 1) % storeData.slides.length;
+          renderHeroSlides();
+        }
+      }, 6000);
+    });
+  </script>
+</body>
+</html>
