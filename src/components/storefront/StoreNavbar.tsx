@@ -9,9 +9,11 @@ import {
   Sparkles,
   BookOpen,
   Flame,
-  MapPin
+  MapPin,
+  Phone
 } from 'lucide-react';
 import { CartItem, StoreProduct, StoreSettings } from '../../types/store';
+import { formatDisplayPhone, formatTelHref } from '../../utils/whatsapp';
 import {
   OFFICIAL_LOGO_URL,
   IMG_BAKKWA_SLICES,
@@ -741,12 +743,19 @@ export const StoreNavbar: React.FC<StoreNavbarProps> = ({
             </div>
           </div>
 
-          <div className="pt-1 border-t border-stone-200/80 dark:border-stone-800 flex items-center justify-between text-xs text-stone-500">
-            <span>{t('檳城柴楞公園老店 · Medan Kurau 1', 'Chai Leng Park, Penang')}</span>
+          <div className="pt-2 border-t border-stone-200/80 dark:border-stone-800 flex flex-wrap items-center justify-between gap-2 text-xs text-stone-500">
+            <a
+              href={formatTelHref(settings.whatsappNumber)}
+              className="inline-flex items-center gap-1.5 min-h-[38px] px-3 py-1.5 rounded-lg bg-red-900 text-amber-100 font-mono font-bold text-xs shadow-2xs touch-manipulation"
+              aria-label={t(`撥打電話 ${formatDisplayPhone(settings.whatsappNumber)}`, `Call ${formatDisplayPhone(settings.whatsappNumber)}`)}
+            >
+              <Phone className="w-3.5 h-3.5 shrink-0" />
+              <span className="whitespace-nowrap">{formatDisplayPhone(settings.whatsappNumber)}</span>
+            </a>
             <button
               type="button"
               onClick={() => navigateToSection('contact')}
-              className="text-red-800 dark:text-amber-300 font-bold underline cursor-pointer"
+              className="min-h-[38px] px-2 text-red-800 dark:text-amber-300 font-bold underline cursor-pointer"
             >
               {t('門市與聯絡資訊 ➔', 'Contact & Store ➔')}
             </button>

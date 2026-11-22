@@ -149,8 +149,10 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
             </div>
 
             <button
+              type="button"
               onClick={onClose}
-              className="p-1.5 text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 rounded-lg hover:bg-stone-200/50 dark:hover:bg-stone-800 transition-colors cursor-pointer"
+              aria-label={t('關閉購物車', 'Close cart')}
+              className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full bg-stone-200/90 dark:bg-stone-800 text-stone-800 dark:text-stone-100 hover:bg-stone-300 dark:hover:bg-stone-700 active:scale-95 transition shrink-0 cursor-pointer touch-manipulation"
             >
               <X className="w-5 h-5" />
             </button>

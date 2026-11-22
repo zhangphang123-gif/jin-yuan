@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { CartItem, OrderCustomerInfo, StoreOrder, StoreSettings } from '../../types/store';
 import { OFFICIAL_QR_URL } from '../../utils/productImages';
 import { resolveReferralForOrder } from '../../utils/referralTracker';
+import { formatDisplayPhone, formatTelHref } from '../../utils/whatsapp';
 import { useLanguage } from '../../context/LanguageContext';
 import {
   X,
@@ -178,23 +179,35 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-950/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 no-print">
-      <div className="relative w-full max-w-2xl bg-white dark:bg-stone-900 rounded-2xl shadow-2xl border border-stone-200 dark:border-stone-800 overflow-hidden flex flex-col max-h-[94vh] animate-in fade-in zoom-in-95 duration-200">
-        
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 bg-stone-950/65 backdrop-blur-xs flex items-end sm:items-center justify-center pt-12 sm:p-6 no-print"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-2xl bg-white dark:bg-stone-900 rounded-t-3xl sm:rounded-2xl shadow-2xl border border-stone-200 dark:border-stone-800 overflow-hidden flex flex-col max-h-[86dvh] sm:max-h-[90vh] animate-in fade-in zoom-in-95 duration-200"
+      >
+        {/* Mobile Sheet Grab Indicator */}
+        <div className="sm:hidden flex justify-center pt-2.5 pb-1 bg-stone-50 dark:bg-stone-950 shrink-0">
+          <div className="w-10 h-1.5 rounded-full bg-stone-300 dark:bg-stone-700" />
+        </div>
+
         {/* Modal Top Bar */}
-        <div className="px-5 sm:px-6 py-4 border-b border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-950 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <h2 className="font-serif-brand text-base sm:text-lg font-bold text-stone-900 dark:text-stone-100">
+        <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-950 flex items-center justify-between gap-3 shrink-0 relative z-20">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <h2 className="font-serif-brand text-base sm:text-lg font-bold text-stone-900 dark:text-stone-100 truncate">
               {t('確認訂單、掃碼付款與送出', 'Checkout & QR Payment')}
             </h2>
-            <span className="text-xs text-stone-500 font-mono">
+            <span className="text-xs text-stone-500 font-mono shrink-0">
               ({cartItems.reduce((acc, i) => acc + i.quantity, 0)} {t('件', 'items')})
             </span>
           </div>
 
           <button
+            type="button"
             onClick={onClose}
-            className="p-1.5 text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 rounded-lg hover:bg-stone-200/50 dark:hover:bg-stone-800 transition-colors cursor-pointer"
+            aria-label={t('關閉結帳視窗', 'Close checkout')}
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full bg-stone-200/90 dark:bg-stone-800 text-stone-800 dark:text-stone-100 hover:bg-stone-300 dark:hover:bg-stone-700 active:scale-95 transition shrink-0 cursor-pointer touch-manipulation"
           >
             <X className="w-5 h-5" />
           </button>
@@ -333,9 +346,15 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   </div>
                 </>
               ) : (
-                <div className="p-3 bg-stone-100 dark:bg-stone-800 rounded-md text-stone-600 dark:text-stone-300 text-xs">
+                <div className="p-3 bg-stone-100 dark:bg-stone-800 rounded-md text-stone-600 dark:text-stone-300 text-xs leading-relaxed">
                   <strong>{t('自取地點：', 'Pickup Location: ')}</strong>
-                  {settings.storeAddress} ({settings.whatsappNumber})
+                  <span>{settings.storeAddress} </span>
+                  <a
+                    href={formatTelHref(settings.whatsappNumber)}
+                    className="inline-flex items-center font-mono font-bold text-red-700 dark:text-amber-300 underline underline-offset-2 whitespace-nowrap py-0.5"
+                  >
+                    ({formatDisplayPhone(settings.whatsappNumber)})
+                  </a>
                 </div>
               )}
             </div>
@@ -584,6 +603,14 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   : t('確認下單，一鍵傳送訂單與截圖至 WhatsApp', 'Submit Order & Send via WhatsApp')}
               </span>
               <ArrowRight className="w-4 h-4" />
+            </button>
+
+            <button
+              type="button"
+              onClick={onClose}
+              className="w-full py-2.5 px-4 text-xs font-semibold text-stone-600 dark:text-stone-300 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 rounded-lg transition cursor-pointer touch-manipulation"
+            >
+              {t('返回繼續選購 / 關閉視窗', 'Back to Store / Close')}
             </button>
           </div>
 

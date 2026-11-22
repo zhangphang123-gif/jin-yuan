@@ -12,6 +12,7 @@ import { FloatingCartWidget } from './FloatingCartWidget';
 import { SocialFollowLinks } from './SocialFollowLinks';
 import { useLanguage, getCategoryLabel } from '../../context/LanguageContext';
 import { IMG_ZONGZI, IMG_MOONCAKE } from '../../utils/productImages';
+import { formatDisplayPhone, formatTelHref, formatWhatsAppPhone } from '../../utils/whatsapp';
 import {
   CategoryFilterOption,
   MeatFilterOption,
@@ -45,7 +46,8 @@ import {
   X,
   RotateCcw,
   LayoutDashboard,
-  Calendar
+  Calendar,
+  MessageCircle
 } from 'lucide-react';
 
 interface StorefrontViewProps {
@@ -673,7 +675,9 @@ export const StorefrontView: React.FC<StorefrontViewProps> = ({
                       product.specs && product.specs.length >= 4
                         ? 'grid-cols-2 sm:grid-cols-3'
                         : product.specs && product.specs.length === 3
-                        ? 'grid-cols-3'
+                        ? isCompact
+                          ? 'grid-cols-2 sm:grid-cols-3'
+                          : 'grid-cols-3'
                         : 'grid-cols-2';
 
                     return (
@@ -833,31 +837,65 @@ export const StorefrontView: React.FC<StorefrontViewProps> = ({
                         <div className={isCompact ? 'p-2.5 sm:p-5 pt-0' : 'p-4 sm:p-5 pt-0'}>
                           <div
                             className={`pt-2 sm:pt-3 border-t border-stone-100 dark:border-stone-800 flex ${
-                              isCompact ? 'flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2' : 'items-center justify-between gap-2'
+                              isCompact
+                                ? 'flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 sm:gap-2'
+                                : 'items-center justify-between gap-2'
                             }`}
                           >
-                            <div className="flex items-baseline justify-between sm:justify-start gap-1.5">
-                              <span
-                                className={`font-mono tabular-nums font-black text-red-800 dark:text-red-400 ${
-                                  isCompact ? 'text-base sm:text-2xl' : 'text-xl sm:text-2xl'
-                                }`}
-                              >
-                                RM {currentPrice.toLocaleString()}
-                              </span>
-                              {product.originalPrice && !currentSpec && (
-                                <span className="font-mono text-[10px] sm:text-xs text-stone-400 line-through">
-                                  RM {product.originalPrice.toLocaleString()}
-                                </span>
-                              )}
-                              {isCompact && (
-                                <button
-                                  type="button"
-                                  onClick={() => setQuickViewProduct(product)}
-                                  className="sm:hidden text-[10px] text-stone-500 underline cursor-pointer"
+                            <div className="space-y-0.5 min-w-0">
+                              <div className="flex items-baseline justify-between sm:justify-start gap-1.5">
+                                <div className="flex items-baseline gap-1.5 min-w-0">
+                                  <span
+                                    className={`font-mono tabular-nums font-black text-red-800 dark:text-red-400 ${
+                                      isCompact ? 'text-base sm:text-2xl' : 'text-xl sm:text-2xl'
+                                    }`}
+                                  >
+                                    RM {currentPrice.toLocaleString()}
+                                  </span>
+                                  {product.originalPrice && !currentSpec && (
+                                    <span className="font-mono text-[10px] sm:text-xs text-stone-400 line-through">
+                                      RM {product.originalPrice.toLocaleString()}
+                                    </span>
+                                  )}
+                                </div>
+                                {isCompact && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setQuickViewProduct(product)}
+                                    className="sm:hidden text-[10px] text-stone-500 underline cursor-pointer shrink-0 font-sans"
+                                  >
+                                    {t('看多圖', 'Photos')}
+                                  </button>
+                                )}
+                              </div>
+
+                              <div className="text-[10px] sm:text-xs font-mono tabular-nums flex items-center gap-1.5">
+                                <span
+                                  className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                                    product.stock <= 0
+                                      ? 'bg-red-500'
+                                      : product.stock <= 10
+                                      ? 'bg-amber-500'
+                                      : 'bg-emerald-500'
+                                  }`}
+                                  aria-hidden="true"
+                                />
+                                <span
+                                  className={
+                                    product.stock <= 0
+                                      ? 'text-red-600 dark:text-red-400 font-bold'
+                                      : product.stock <= 10
+                                      ? 'text-amber-700 dark:text-amber-400 font-bold'
+                                      : 'text-stone-600 dark:text-stone-300 font-semibold'
+                                  }
                                 >
-                                  {t('看多圖詳情', 'Photos')}
-                                </button>
-                              )}
+                                  {product.stock <= 0
+                                    ? t('暫時售完', 'Out of stock')
+                                    : product.stock <= 10
+                                    ? t(`僅剩 ${product.stock} 件`, `Only ${product.stock} left`)
+                                    : t(`現貨庫存：${product.stock} 件`, `In Stock: ${product.stock}`)}
+                                </span>
+                              </div>
                             </div>
 
                             <button
@@ -1003,14 +1041,29 @@ export const StorefrontView: React.FC<StorefrontViewProps> = ({
                   </p>
                 </div>
 
-                <div className="pt-3.5 border-t border-stone-200/90 dark:border-stone-800 flex items-center justify-between gap-3">
-                  <div className="font-mono tabular-nums text-2xl sm:text-[26px] font-black text-red-800 dark:text-red-400">
-                    RM 11 <span className="text-sm font-bold text-stone-500">/ {t('粒', 'pc')}</span>
+                <div className="pt-3.5 border-t border-stone-200/90 dark:border-stone-800 flex flex-wrap items-center justify-between gap-2.5">
+                  <div className="space-y-0.5 min-w-0">
+                    <div className="font-mono tabular-nums text-2xl sm:text-[26px] font-black text-red-800 dark:text-red-400 leading-none">
+                      RM {zongziProduct.price} <span className="text-sm font-bold text-stone-500">/ {t('粒', 'pc')}</span>
+                    </div>
+                    <div className="text-[11px] font-mono tabular-nums flex items-center gap-1.5">
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                          zongziProduct.stock <= 0 ? 'bg-red-500' : zongziProduct.stock <= 10 ? 'bg-amber-500' : 'bg-emerald-500'
+                        }`}
+                        aria-hidden="true"
+                      />
+                      <span className={zongziProduct.stock <= 0 ? 'text-red-600 font-bold' : 'text-stone-600 dark:text-stone-300 font-semibold'}>
+                        {zongziProduct.stock <= 0
+                          ? t('暫時售完', 'Out of stock')
+                          : t(`現貨庫存：${zongziProduct.stock} 粒`, `In Stock: ${zongziProduct.stock}`)}
+                      </span>
+                    </div>
                   </div>
                   <button
                     type="button"
                     onClick={() => handleAdd(zongziProduct)}
-                    className={`min-h-[44px] px-4 sm:px-5 py-2.5 rounded-xl font-black text-xs sm:text-sm transition-transform flex items-center gap-1.5 cursor-pointer shadow-md active:scale-95 whitespace-nowrap ${
+                    className={`min-h-[44px] px-4 sm:px-5 py-2.5 rounded-xl font-black text-xs sm:text-sm transition-transform flex items-center gap-1.5 cursor-pointer shadow-md active:scale-95 whitespace-nowrap shrink-0 ${
                       addedIds[zongziProduct.id]
                         ? 'bg-emerald-600 text-white'
                         : 'bg-gradient-to-r from-red-800 to-red-900 hover:from-red-700 hover:to-red-800 text-white border border-amber-400/50'
@@ -1116,14 +1169,29 @@ export const StorefrontView: React.FC<StorefrontViewProps> = ({
                   </div>
                 </div>
 
-                <div className="pt-3.5 border-t border-stone-200/90 dark:border-stone-800 flex items-center justify-between gap-3">
-                  <div className="font-mono tabular-nums text-2xl sm:text-[26px] font-black text-red-800 dark:text-red-400">
-                    RM 15 <span className="text-sm font-bold text-stone-500">/ {t('粒', 'pc')}</span>
+                <div className="pt-3.5 border-t border-stone-200/90 dark:border-stone-800 flex flex-wrap items-center justify-between gap-2.5">
+                  <div className="space-y-0.5 min-w-0">
+                    <div className="font-mono tabular-nums text-2xl sm:text-[26px] font-black text-red-800 dark:text-red-400 leading-none">
+                      RM {mooncakeProduct.price} <span className="text-sm font-bold text-stone-500">/ {t('粒', 'pc')}</span>
+                    </div>
+                    <div className="text-[11px] font-mono tabular-nums flex items-center gap-1.5">
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                          mooncakeProduct.stock <= 0 ? 'bg-red-500' : mooncakeProduct.stock <= 10 ? 'bg-amber-500' : 'bg-emerald-500'
+                        }`}
+                        aria-hidden="true"
+                      />
+                      <span className={mooncakeProduct.stock <= 0 ? 'text-red-600 font-bold' : 'text-stone-600 dark:text-stone-300 font-semibold'}>
+                        {mooncakeProduct.stock <= 0
+                          ? t('暫時售完', 'Out of stock')
+                          : t(`現貨庫存：${mooncakeProduct.stock} 粒`, `In Stock: ${mooncakeProduct.stock}`)}
+                      </span>
+                    </div>
                   </div>
                   <button
                     type="button"
                     onClick={() => handleAdd(mooncakeProduct)}
-                    className={`min-h-[44px] px-4 sm:px-5 py-2.5 rounded-xl font-black text-xs sm:text-sm transition-transform flex items-center gap-1.5 cursor-pointer shadow-md active:scale-95 whitespace-nowrap ${
+                    className={`min-h-[44px] px-4 sm:px-5 py-2.5 rounded-xl font-black text-xs sm:text-sm transition-transform flex items-center gap-1.5 cursor-pointer shadow-md active:scale-95 whitespace-nowrap shrink-0 ${
                       addedIds[mooncakeProduct.id]
                         ? 'bg-emerald-600 text-white'
                         : 'bg-gradient-to-r from-red-800 to-red-900 hover:from-red-700 hover:to-red-800 text-white border border-amber-400/50'
@@ -1190,17 +1258,33 @@ export const StorefrontView: React.FC<StorefrontViewProps> = ({
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-5 text-xs sm:text-sm text-stone-600 dark:text-stone-300">
-            <div className="p-3.5 sm:p-5 bg-stone-50 dark:bg-stone-950 rounded-2xl border border-stone-200/80 dark:border-stone-800 space-y-1.5 text-center flex flex-col justify-between">
-              <div className="space-y-1.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 text-xs sm:text-sm text-stone-600 dark:text-stone-300">
+            <div className="p-4 sm:p-5 bg-stone-50 dark:bg-stone-950 rounded-2xl border border-stone-200/80 dark:border-stone-800 space-y-2 text-center flex flex-col justify-between">
+              <div className="space-y-2">
                 <Phone className="w-5 h-5 sm:w-6 sm:h-6 mx-auto text-red-700" />
                 <h3 className="font-bold text-sm sm:text-base text-stone-900 dark:text-stone-100">
                   {t('負責人與電話', 'Contact & Phone')}
                 </h3>
-                <p className="truncate">{settings.contactPerson}</p>
-                <p className="font-mono text-red-800 dark:text-red-400 font-bold text-[11px] sm:text-sm break-all">
-                  {settings.whatsappNumber}
-                </p>
+                <p className="text-stone-700 dark:text-stone-300 font-medium">{settings.contactPerson}</p>
+                <div className="flex flex-col items-center gap-1.5 pt-0.5">
+                  <a
+                    href={formatTelHref(settings.whatsappNumber)}
+                    className="w-full min-h-[42px] inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-red-800 hover:bg-red-700 active:scale-95 text-white font-mono font-bold text-xs sm:text-sm transition shadow-xs touch-manipulation"
+                    aria-label={t(`撥打電話 ${formatDisplayPhone(settings.whatsappNumber)}`, `Call ${formatDisplayPhone(settings.whatsappNumber)}`)}
+                  >
+                    <Phone className="w-3.5 h-3.5 shrink-0" />
+                    <span className="whitespace-nowrap">{formatDisplayPhone(settings.whatsappNumber)}</span>
+                  </a>
+                  <a
+                    href={`https://wa.me/${formatWhatsAppPhone(settings.whatsappNumber)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full min-h-[38px] inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 font-bold text-xs transition touch-manipulation"
+                  >
+                    <MessageCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>{t('WhatsApp 聯繫客服', 'WhatsApp Support')}</span>
+                  </a>
+                </div>
               </div>
               <div className="pt-2.5 mt-2 border-t border-stone-200/80 dark:border-stone-800">
                 <button
@@ -1215,34 +1299,39 @@ export const StorefrontView: React.FC<StorefrontViewProps> = ({
               </div>
             </div>
 
-            <div className="p-3.5 sm:p-5 bg-stone-50 dark:bg-stone-950 rounded-2xl border border-stone-200/80 dark:border-stone-800 space-y-1.5 text-center">
+            <div className="p-4 sm:p-5 bg-stone-50 dark:bg-stone-950 rounded-2xl border border-stone-200/80 dark:border-stone-800 space-y-1.5 text-center">
               <MapPin className="w-5 h-5 sm:w-6 sm:h-6 mx-auto text-red-700" />
               <h3 className="font-bold text-sm sm:text-base text-stone-900 dark:text-stone-100">
                 {t('門市自取地址', 'Pickup Address')}
               </h3>
-              <p className="leading-relaxed text-[11px] sm:text-sm line-clamp-3">
+              <p className="leading-relaxed text-xs sm:text-sm">
                 {settings.storeAddress}
               </p>
             </div>
 
-            <div className="p-3.5 sm:p-5 bg-stone-50 dark:bg-stone-950 rounded-2xl border border-stone-200/80 dark:border-stone-800 space-y-1.5 text-center">
+            <div className="p-4 sm:p-5 bg-stone-50 dark:bg-stone-950 rounded-2xl border border-stone-200/80 dark:border-stone-800 space-y-1.5 text-center">
               <Clock className="w-5 h-5 sm:w-6 sm:h-6 mx-auto text-red-700" />
               <h3 className="font-bold text-sm sm:text-base text-stone-900 dark:text-stone-100">
                 {t('自取與出貨時間', 'Hours & Shipping')}
               </h3>
-              <p className="text-[11px] sm:text-sm">8:00 AM - 10:00 PM</p>
-              <p className="text-amber-800 dark:text-amber-400 font-medium text-[11px] sm:text-sm">
+              <p className="text-xs sm:text-sm font-medium">8:00 AM - 10:00 PM</p>
+              <p className="text-amber-800 dark:text-amber-400 font-medium text-xs sm:text-sm">
                 {t('全馬常溫獨立真空郵寄', 'Nationwide Vacuum Courier')}
               </p>
             </div>
 
-            <div className="p-3.5 sm:p-5 bg-stone-50 dark:bg-stone-950 rounded-2xl border border-stone-200/80 dark:border-stone-800 space-y-1.5 text-center">
+            <div className="p-4 sm:p-5 bg-stone-50 dark:bg-stone-950 rounded-2xl border border-stone-200/80 dark:border-stone-800 space-y-1.5 text-center">
               <Mail className="w-5 h-5 sm:w-6 sm:h-6 mx-auto text-red-700" />
               <h3 className="font-bold text-sm sm:text-base text-stone-900 dark:text-stone-100">
                 {t('電子郵件與批發', 'Email & Wholesale')}
               </h3>
-              <p className="font-mono text-[11px] sm:text-sm break-all">{settings.email}</p>
-              <p className="text-stone-500 text-[11px] sm:text-sm">
+              <a
+                href={`mailto:${settings.email}`}
+                className="inline-block font-mono text-xs sm:text-sm text-red-800 dark:text-amber-300 hover:underline break-all py-1"
+              >
+                {settings.email}
+              </a>
+              <p className="text-stone-500 text-xs sm:text-sm">
                 {t('公司/商會年節團購歡迎諮詢', 'Corporate & CNY Bulk Orders Welcome')}
               </p>
             </div>

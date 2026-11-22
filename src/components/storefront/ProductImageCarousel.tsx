@@ -76,47 +76,62 @@ export const ProductImageCarousel: React.FC<ProductImageCarouselProps> = ({
           referrerPolicy="no-referrer"
         />
 
-        {/* Top Left Single Subtle Tag */}
-        {isLuxury ? (
-          product.badge ? (
-            <div className="absolute top-3 left-3 z-10 pointer-events-none">
-              <span className="text-[10px] font-semibold tracking-wider text-[#F6DFA9] bg-[#0B0807]/85 px-2.5 py-0.5 rounded-sm border border-[#E5B869]/40 backdrop-blur-md">
+        {/* Top Overlay Bar: Left Badge + Right Stock Indicator (Flex row prevents overlap on narrow 2-col mobile cards) */}
+        <div className="absolute top-1.5 sm:top-2.5 inset-x-1.5 sm:inset-x-2.5 z-10 flex items-start justify-between gap-1 pointer-events-none">
+          <div className="min-w-0 max-w-[54%]">
+            {isLuxury ? (
+              product.badge ? (
+                <span className="inline-block max-w-full truncate text-[10px] font-semibold tracking-wider text-[#F6DFA9] bg-[#0B0807]/85 px-2 py-0.5 rounded-sm border border-[#E5B869]/40 backdrop-blur-md">
+                  {lang === 'en' && product.badgeEn ? product.badgeEn : product.badge}
+                </span>
+              ) : null
+            ) : isFestive ? (
+              product.badge ? (
+                <span className="inline-block max-w-full truncate text-[10px] font-semibold tracking-wider text-[#FBF7F0] bg-[#7A1215]/90 px-2 py-0.5 rounded-sm border border-[#D4AF37]/40 backdrop-blur-xs">
+                  {lang === 'en' && product.badgeEn ? product.badgeEn : product.badge}
+                </span>
+              ) : null
+            ) : product.badge ? (
+              <span className="inline-block max-w-full truncate text-[10px] sm:text-xs font-bold text-white bg-red-800/90 px-1.5 sm:px-2 py-0.5 rounded shadow-xs backdrop-blur-xs">
                 {lang === 'en' && product.badgeEn ? product.badgeEn : product.badge}
               </span>
-            </div>
-          ) : null
-        ) : isFestive ? (
-          product.badge ? (
-            <div className="absolute top-3 left-3 z-10 pointer-events-none">
-              <span className="text-[10px] font-semibold tracking-wider text-[#FBF7F0] bg-[#7A1215]/90 px-2.5 py-0.5 rounded-sm border border-[#D4AF37]/40 backdrop-blur-xs">
-                {lang === 'en' && product.badgeEn ? product.badgeEn : product.badge}
+            ) : (
+              <span className="hidden sm:inline-block max-w-full truncate text-xs font-mono font-bold tracking-wider text-stone-700 dark:text-stone-300 bg-white/90 dark:bg-stone-900/90 px-2 py-0.5 rounded shadow-xs">
+                {product.sku}
               </span>
-            </div>
-          ) : null
-        ) : product.badge ? (
-          <div className="absolute top-1.5 sm:top-2.5 left-1.5 sm:left-2.5 z-10 pointer-events-none">
-            <span className="text-[10px] sm:text-xs font-bold text-white bg-red-800/90 px-2 py-0.5 rounded shadow-xs backdrop-blur-xs">
-              {lang === 'en' && product.badgeEn ? product.badgeEn : product.badge}
-            </span>
+            )}
           </div>
-        ) : (
-          <div className="hidden sm:block absolute top-2.5 left-2.5 z-10 pointer-events-none">
-            <span className="text-xs font-mono font-bold tracking-wider text-stone-700 dark:text-stone-300 bg-white/90 dark:bg-stone-900/90 px-2 py-0.5 rounded shadow-xs">
-              {product.sku}
-            </span>
-          </div>
-        )}
 
-        {/* Top Right Stock indicator (Classic only) */}
-        {!isFestive && !isLuxury && (
           <div
-            className={`absolute top-1.5 sm:top-2.5 right-1.5 sm:right-2.5 z-10 text-[10px] sm:text-xs font-mono font-bold text-stone-100 bg-stone-950/75 px-1.5 sm:px-2 py-0.5 rounded shadow-xs pointer-events-none ${
-              compactMobile ? 'hidden sm:block' : 'block'
+            className={`shrink-0 whitespace-nowrap inline-flex items-center gap-1 text-[10px] sm:text-xs font-mono tabular-nums font-bold px-1.5 sm:px-2 py-0.5 rounded shadow-xs backdrop-blur-xs ${
+              product.stock <= 0
+                ? 'bg-red-900/95 text-red-100 border border-red-400/50'
+                : product.stock <= 10
+                ? 'bg-amber-900/95 text-amber-100 border border-amber-400/50'
+                : isLuxury
+                ? 'bg-[#0B0807]/85 text-[#F6DFA9] border border-[#E5B869]/40'
+                : isFestive
+                ? 'bg-[#580A0D]/88 text-[#F9E8C4] border border-[#D4AF37]/40'
+                : 'bg-stone-950/85 text-stone-100'
             }`}
           >
-            {t('庫存', 'Stock')} {product.stock}
+            <span
+              className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                product.stock <= 0
+                  ? 'bg-red-400'
+                  : product.stock <= 10
+                  ? 'bg-amber-400'
+                  : 'bg-emerald-400'
+              }`}
+              aria-hidden="true"
+            />
+            <span>
+              {product.stock <= 0
+                ? t('已售完', 'Sold Out')
+                : `${t('庫存', 'Stock')} ${product.stock}`}
+            </span>
           </div>
-        )}
+        </div>
 
         {/* Navigation Arrows */}
         {images.length > 1 && (

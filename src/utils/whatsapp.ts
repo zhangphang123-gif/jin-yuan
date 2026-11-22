@@ -120,6 +120,24 @@ export function formatWhatsAppPhone(phone: string): string {
   return digits;
 }
 
+export function formatTelHref(phone: string): string {
+  const normalized = formatWhatsAppPhone(phone || '60124947842');
+  return normalized ? `tel:+${normalized}` : 'tel:+60124947842';
+}
+
+export function formatDisplayPhone(phone: string): string {
+  const normalized = formatWhatsAppPhone(phone || '60124947842');
+  if (!normalized) return '+60 12-494 7842';
+  // Format Malaysian mobile numbers neatly: +60 12-494 7842 or +60 11-2916 3398
+  if (normalized.startsWith('60') && normalized.length === 11) {
+    return `+60 ${normalized.slice(2, 4)}-${normalized.slice(4, 7)} ${normalized.slice(7)}`;
+  }
+  if (normalized.startsWith('60') && normalized.length === 12) {
+    return `+60 ${normalized.slice(2, 4)}-${normalized.slice(4, 8)} ${normalized.slice(8)}`;
+  }
+  return `+${normalized}`;
+}
+
 export function formatShippedFollowUpMessage(
   order: StoreOrder,
   settings: StoreSettings,

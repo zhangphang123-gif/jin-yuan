@@ -7,7 +7,7 @@ import { FloatingCartWidget } from './FloatingCartWidget';
 import { SocialFollowLinks } from './SocialFollowLinks';
 import { useLanguage, getCategoryLabel } from '../../context/LanguageContext';
 import { OFFICIAL_LOGO_URL, IMG_ZONGZI, IMG_MOONCAKE } from '../../utils/productImages';
-import { formatWhatsAppPhone } from '../../utils/whatsapp';
+import { formatDisplayPhone, formatTelHref, formatWhatsAppPhone } from '../../utils/whatsapp';
 import {
   CategoryFilterOption,
   MeatFilterOption,
@@ -33,6 +33,7 @@ import {
   MapPin,
   Clock,
   Mail,
+  Phone,
   MessageCircle,
   BookOpen,
   AlertCircle,
@@ -780,7 +781,7 @@ export const FestiveCnyStorefront: React.FC<FestiveCnyStorefrontProps> = ({
                         />
                       </div>
 
-                      <div className="p-5 space-y-3">
+                      <div className="p-4 sm:p-5 space-y-2.5 sm:space-y-3">
                         <div className="flex items-center justify-between text-[11px] font-semibold text-[#7A1215]">
                           <span className="truncate uppercase tracking-wider">
                             {getCategoryLabel(product.category, product.categoryLabelZh, lang, storeCategories)} · {meatLabel}
@@ -886,22 +887,51 @@ export const FestiveCnyStorefront: React.FC<FestiveCnyStorefrontProps> = ({
                     </div>
 
                     {/* Consistent Bottom Pricing & Add Action */}
-                    <div className="px-5 pb-5 pt-3 border-t border-[#F1E8D8] flex items-center justify-between gap-3">
-                      <div>
-                        <span className="font-mono tabular-nums text-xl font-black text-[#7A1215]">
-                          RM {currentPrice.toLocaleString()}
-                        </span>
-                        {product.originalPrice && !currentSpec && (
-                          <span className="ml-2 font-mono text-xs text-[#8A7B73] line-through">
-                            RM {product.originalPrice.toLocaleString()}
+                    <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-3 border-t border-[#F1E8D8] flex flex-wrap items-center justify-between gap-2.5">
+                      <div className="min-w-0 space-y-0.5">
+                        <div className="flex items-baseline gap-2">
+                          <span className="font-mono tabular-nums text-xl font-black text-[#7A1215]">
+                            RM {currentPrice.toLocaleString()}
                           </span>
-                        )}
+                          {product.originalPrice && !currentSpec && (
+                            <span className="font-mono text-xs text-[#8A7B73] line-through">
+                              RM {product.originalPrice.toLocaleString()}
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-[11px] font-mono tabular-nums flex items-center gap-1.5">
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                              product.stock <= 0
+                                ? 'bg-red-500'
+                                : product.stock <= 10
+                                ? 'bg-amber-500'
+                                : 'bg-emerald-600'
+                            }`}
+                            aria-hidden="true"
+                          />
+                          <span
+                            className={
+                              product.stock <= 0
+                                ? 'text-red-600 font-bold'
+                                : product.stock <= 10
+                                ? 'text-amber-700 font-bold'
+                                : 'text-[#665852] font-semibold'
+                            }
+                          >
+                            {product.stock <= 0
+                              ? t('暫時售完', 'Out of stock')
+                              : product.stock <= 10
+                              ? t(`僅剩 ${product.stock} 件`, `Only ${product.stock} left`)
+                              : t(`現貨庫存：${product.stock} 件`, `In Stock: ${product.stock}`)}
+                          </span>
+                        </div>
                       </div>
 
                       <button
                         type="button"
                         onClick={() => handleAdd(product)}
-                        className={`px-4 py-2.5 rounded-lg text-xs font-bold transition cursor-pointer inline-flex items-center gap-1.5 whitespace-nowrap shadow-xs ${
+                        className={`px-3.5 sm:px-4 py-2.5 rounded-lg text-xs font-bold transition cursor-pointer inline-flex items-center gap-1.5 whitespace-nowrap shrink-0 shadow-xs ${
                           isAdded
                             ? 'bg-emerald-700 text-white'
                             : needsSelection
@@ -990,14 +1020,29 @@ export const FestiveCnyStorefront: React.FC<FestiveCnyStorefrontProps> = ({
                     {t('嚴選上等五花肉、香菇與五香滷料飽滿包裹，香氣濃郁，節慶佳餚必備。', 'Traditional five-spice braised pork belly & mushroom Bak Chang wrapped by hand.')}
                   </p>
                 </div>
-                <div className="flex items-center justify-between pt-3 border-t border-[#DFD2BC]">
-                  <span className="font-mono tabular-nums text-2xl font-black text-[#7A1215]">
-                    RM 11 <span className="text-xs font-semibold text-[#665852]">/ {t('粒', 'pc')}</span>
-                  </span>
+                <div className="flex flex-wrap items-center justify-between gap-2.5 pt-3 border-t border-[#DFD2BC]">
+                  <div className="min-w-0 space-y-0.5">
+                    <span className="font-mono tabular-nums text-2xl font-black text-[#7A1215] block leading-none">
+                      RM {zongziProduct.price} <span className="text-xs font-semibold text-[#665852]">/ {t('粒', 'pc')}</span>
+                    </span>
+                    <div className="text-[11px] font-mono tabular-nums flex items-center gap-1.5">
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                          zongziProduct.stock <= 0 ? 'bg-red-500' : zongziProduct.stock <= 10 ? 'bg-amber-500' : 'bg-emerald-600'
+                        }`}
+                        aria-hidden="true"
+                      />
+                      <span className={zongziProduct.stock <= 0 ? 'text-red-600 font-bold' : 'text-[#665852] font-semibold'}>
+                        {zongziProduct.stock <= 0
+                          ? t('暫時售完', 'Out of stock')
+                          : t(`現貨庫存：${zongziProduct.stock} 粒`, `In Stock: ${zongziProduct.stock}`)}
+                      </span>
+                    </div>
+                  </div>
                   <button
                     type="button"
                     onClick={() => handleAdd(zongziProduct)}
-                    className={`px-4 py-2.5 rounded-lg text-xs font-bold transition cursor-pointer inline-flex items-center gap-1.5 shadow-sm ${
+                    className={`px-4 py-2.5 rounded-lg text-xs font-bold transition cursor-pointer inline-flex items-center gap-1.5 whitespace-nowrap shrink-0 shadow-sm ${
                       addedIds[zongziProduct.id]
                         ? 'bg-emerald-700 text-white'
                         : 'bg-[#7A1215] hover:bg-[#580A0D] text-[#F9E8C4]'
@@ -1060,14 +1105,29 @@ export const FestiveCnyStorefront: React.FC<FestiveCnyStorefrontProps> = ({
                     })}
                   </div>
                 </div>
-                <div className="flex items-center justify-between pt-3 border-t border-[#DFD2BC]">
-                  <span className="font-mono tabular-nums text-2xl font-black text-[#7A1215]">
-                    RM 15 <span className="text-xs font-semibold text-[#665852]">/ {t('粒', 'pc')}</span>
-                  </span>
+                <div className="flex flex-wrap items-center justify-between gap-2.5 pt-3 border-t border-[#DFD2BC]">
+                  <div className="min-w-0 space-y-0.5">
+                    <span className="font-mono tabular-nums text-2xl font-black text-[#7A1215] block leading-none">
+                      RM {mooncakeProduct.price} <span className="text-xs font-semibold text-[#665852]">/ {t('粒', 'pc')}</span>
+                    </span>
+                    <div className="text-[11px] font-mono tabular-nums flex items-center gap-1.5">
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                          mooncakeProduct.stock <= 0 ? 'bg-red-500' : mooncakeProduct.stock <= 10 ? 'bg-amber-500' : 'bg-emerald-600'
+                        }`}
+                        aria-hidden="true"
+                      />
+                      <span className={mooncakeProduct.stock <= 0 ? 'text-red-600 font-bold' : 'text-[#665852] font-semibold'}>
+                        {mooncakeProduct.stock <= 0
+                          ? t('暫時售完', 'Out of stock')
+                          : t(`現貨庫存：${mooncakeProduct.stock} 粒`, `In Stock: ${mooncakeProduct.stock}`)}
+                      </span>
+                    </div>
+                  </div>
                   <button
                     type="button"
                     onClick={() => handleAdd(mooncakeProduct)}
-                    className={`px-4 py-2.5 rounded-lg text-xs font-bold transition cursor-pointer inline-flex items-center gap-1.5 shadow-sm ${
+                    className={`px-4 py-2.5 rounded-lg text-xs font-bold transition cursor-pointer inline-flex items-center gap-1.5 whitespace-nowrap shrink-0 shadow-sm ${
                       addedIds[mooncakeProduct.id]
                         ? 'bg-emerald-700 text-white'
                         : 'bg-[#7A1215] hover:bg-[#580A0D] text-[#F9E8C4]'
@@ -1120,25 +1180,38 @@ export const FestiveCnyStorefront: React.FC<FestiveCnyStorefrontProps> = ({
               </div>
             </div>
 
-            {/* Col 3: Direct WhatsApp & Corporate Bulk Orders */}
+            {/* Col 3: Direct Call, WhatsApp & Corporate Bulk Orders */}
             <div className="space-y-2.5">
               <div className="text-[11px] font-bold uppercase tracking-widest text-[#7A1215]">
                 {t('聯繫與年節企業團購', 'Contact & CNY Corporate Orders')}
               </div>
               <p className="text-xs font-bold text-[#211715]">{settings.contactPerson}</p>
+              <div className="flex flex-col items-start gap-2">
+                <a
+                  href={formatTelHref(settings.whatsappNumber)}
+                  className="inline-flex items-center gap-1.5 min-h-[40px] px-3 py-1.5 rounded-lg bg-[#7A1215] hover:bg-[#580A0D] text-[#F9E8C4] text-xs font-mono font-bold transition shadow-2xs touch-manipulation"
+                  aria-label={t(`撥打電話 ${formatDisplayPhone(settings.whatsappNumber)}`, `Call ${formatDisplayPhone(settings.whatsappNumber)}`)}
+                >
+                  <Phone className="w-3.5 h-3.5 shrink-0" />
+                  <span className="whitespace-nowrap">{formatDisplayPhone(settings.whatsappNumber)}</span>
+                </a>
+                <a
+                  href={whatsappInquiryUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 min-h-[38px] px-3 py-1.5 rounded-lg bg-emerald-700/10 hover:bg-emerald-700/20 border border-emerald-700/25 text-xs font-mono font-bold text-emerald-800 transition touch-manipulation"
+                >
+                  <MessageCircle className="w-3.5 h-3.5 shrink-0" />
+                  <span>{t('WhatsApp 線上諮詢', 'WhatsApp Chat')}</span>
+                </a>
+              </div>
               <a
-                href={whatsappInquiryUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-emerald-700 hover:text-[#7A1215] transition"
+                href={`mailto:${settings.email}`}
+                className="inline-flex items-center gap-1.5 text-xs text-[#665852] hover:text-[#7A1215] font-mono break-all py-0.5 transition"
               >
-                <MessageCircle className="w-3.5 h-3.5 shrink-0" />
-                <span>+{whatsappClean} (WhatsApp)</span>
-              </a>
-              <div className="flex items-center gap-1.5 text-xs text-[#665852] font-mono break-all">
                 <Mail className="w-3.5 h-3.5 shrink-0" />
                 <span>{settings.email}</span>
-              </div>
+              </a>
             </div>
 
             {/* Col 4: Courier & Social */}

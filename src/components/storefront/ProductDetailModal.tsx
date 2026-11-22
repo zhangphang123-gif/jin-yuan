@@ -97,11 +97,11 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-end sm:items-center justify-center sm:p-4 animate-fade"
+      className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-end sm:items-center justify-center pt-12 sm:p-4 animate-fade"
       onClick={onClose}
     >
       <div
-        className="bg-white dark:bg-stone-900 rounded-t-3xl sm:rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-stone-100"
+        className="bg-white dark:bg-stone-900 rounded-t-3xl sm:rounded-3xl max-w-2xl w-full max-h-[86dvh] sm:max-h-[90vh] overflow-y-auto shadow-2xl border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-stone-100"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Mobile grab handle */}
@@ -110,7 +110,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
         </div>
 
         {/* Close header bar */}
-        <div className="px-4 sm:px-6 py-2.5 sm:py-3.5 border-b border-stone-100 dark:border-stone-800 flex items-center justify-between sticky top-0 bg-white/95 dark:bg-stone-900/95 backdrop-blur-md z-20">
+        <div className="px-4 sm:px-6 py-2.5 sm:py-3.5 border-b border-stone-100 dark:border-stone-800 flex items-center justify-between gap-2 sticky top-0 bg-white/95 dark:bg-stone-900/95 backdrop-blur-md z-20">
           <div className="text-xs text-stone-500 flex items-center gap-2 font-medium truncate">
             <span className="text-red-800 dark:text-red-400 font-bold">
               {getCategoryLabel(product.category, product.categoryLabelZh, lang, categories)}
@@ -119,9 +119,10 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
             <span className="font-mono">{product.sku}</span>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="min-h-[40px] min-w-[40px] flex items-center justify-center rounded-full bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 hover:bg-stone-200 transition cursor-pointer"
-            aria-label="Close modal"
+            className="min-h-[44px] min-w-[44px] shrink-0 flex items-center justify-center rounded-full bg-stone-200/90 dark:bg-stone-800 text-stone-700 dark:text-stone-200 hover:bg-stone-300 dark:hover:bg-stone-700 active:scale-95 transition cursor-pointer touch-manipulation"
+            aria-label={t('關閉視窗', 'Close modal')}
           >
             <X className="w-5 h-5" />
           </button>

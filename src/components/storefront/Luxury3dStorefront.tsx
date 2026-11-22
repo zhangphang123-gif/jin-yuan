@@ -16,7 +16,7 @@ import {
   IMG_ZONGZI,
   IMG_MOONCAKE,
 } from '../../utils/productImages';
-import { formatWhatsAppPhone } from '../../utils/whatsapp';
+import { formatDisplayPhone, formatTelHref, formatWhatsAppPhone } from '../../utils/whatsapp';
 import {
   CategoryFilterOption,
   MeatFilterOption,
@@ -45,6 +45,7 @@ import {
   Clock,
   Mail,
   Phone,
+  MessageCircle,
   BookOpen,
   AlertCircle,
   RotateCcw,
@@ -750,34 +751,33 @@ export const Luxury3dStorefront: React.FC<Luxury3dStorefrontProps> = ({
           </div>
 
           {/* Extracted Floating Glass Capsules (Decoupled from Hero Poster Surface!) */}
-          <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2.5 sm:gap-3">
-            <div className="luxury-glass-panel px-4 py-2 rounded-full text-xs font-medium text-[#F6DFA9] flex items-center gap-2 shadow-lg">
+          <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 sm:gap-3">
+            <div className="luxury-glass-panel px-3.5 sm:px-4 py-2 rounded-full text-xs font-medium text-[#F6DFA9] flex items-center gap-2 shadow-lg max-w-full">
               <Flame className="w-3.5 h-3.5 text-[#E5B869] shrink-0" />
-              <span>{t('40年古法炭火現烤 · 每日新鮮出爐', '40-Year Live Charcoal Grill · Baked Daily')}</span>
+              <span className="truncate">{t('40年古法炭火現烤 · 每日新鮮出爐', '40-Year Live Charcoal Grill · Baked Daily')}</span>
             </div>
 
             <button
               type="button"
               onClick={() => scrollToSection('luxury-contact')}
-              className="luxury-glass-panel px-4 py-2 rounded-full text-xs font-medium text-[#F5EDE0] hover:border-[#E5B869]/60 flex items-center gap-2 shadow-lg transition cursor-pointer"
+              className="luxury-glass-panel min-h-[40px] px-3.5 sm:px-4 py-2 rounded-full text-xs font-medium text-[#F5EDE0] hover:border-[#E5B869]/60 flex items-center gap-2 shadow-lg transition cursor-pointer max-w-full touch-manipulation"
             >
               <MapPin className="w-3.5 h-3.5 text-[#E5B869] shrink-0" />
-              <span className="truncate max-w-[260px] sm:max-w-md">{settings.storeAddress}</span>
+              <span className="truncate max-w-[240px] sm:max-w-md">{settings.storeAddress}</span>
             </button>
 
             <a
-              href={whatsappUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="luxury-glass-panel px-4 py-2 rounded-full text-xs font-mono font-semibold text-[#F6DFA9] hover:border-[#E5B869]/60 flex items-center gap-2 shadow-lg transition"
+              href={formatTelHref(settings.whatsappNumber)}
+              className="luxury-glass-panel min-h-[40px] px-3.5 sm:px-4 py-2 rounded-full text-xs font-mono font-semibold text-[#F6DFA9] hover:border-[#E5B869]/60 flex items-center gap-2 shadow-lg transition touch-manipulation"
+              aria-label={t(`撥打電話 ${formatDisplayPhone(settings.whatsappNumber)}`, `Call ${formatDisplayPhone(settings.whatsappNumber)}`)}
             >
               <Phone className="w-3.5 h-3.5 text-[#E5B869] shrink-0" />
-              <span>+{whatsappClean}</span>
+              <span className="whitespace-nowrap">{formatDisplayPhone(settings.whatsappNumber)}</span>
             </a>
 
-            <div className="luxury-glass-panel px-4 py-2 rounded-full text-xs font-medium text-[#E5B869] flex items-center gap-2 shadow-lg">
+            <div className="luxury-glass-panel px-3.5 sm:px-4 py-2 rounded-full text-xs font-medium text-[#E5B869] flex items-center gap-2 shadow-lg max-w-full">
               <Truck className="w-3.5 h-3.5 shrink-0" />
-              <span>
+              <span className="truncate">
                 {t(`滿 RM ${freeThreshold} 全馬真空免運`, `Free MY Vacuum Delivery RM ${freeThreshold}+`)}
               </span>
             </div>
@@ -1214,7 +1214,7 @@ export const Luxury3dStorefront: React.FC<Luxury3dStorefrontProps> = ({
                           onImageClick={() => setQuickViewProduct(product)}
                         />
 
-                        <div className="p-5 space-y-3">
+                        <div className="p-4 sm:p-5 space-y-2.5 sm:space-y-3">
                           {/* Clean Unboxed Metadata Row */}
                           <div className="flex items-center justify-between gap-2 text-xs text-[#BFA98D]">
                             <span className="truncate text-[#E5B869] font-medium">
@@ -1325,23 +1325,52 @@ export const Luxury3dStorefront: React.FC<Luxury3dStorefrontProps> = ({
                       </div>
 
                       {/* Price & Shimmer Add to Cart Footer */}
-                      <div className="p-5 pt-0">
-                        <div className="pt-3.5 border-t border-[#E5B869]/15 flex items-center justify-between gap-3">
-                          <div>
-                            <div className="font-mono tabular-nums text-xl sm:text-2xl font-bold text-[#F6DFA9]">
-                              RM {currentPrice.toLocaleString()}
+                      <div className="p-4 sm:p-5 pt-0">
+                        <div className="pt-3.5 border-t border-[#E5B869]/15 flex flex-wrap items-center justify-between gap-2.5">
+                          <div className="min-w-0 space-y-0.5">
+                            <div className="flex items-baseline gap-2">
+                              <span className="font-mono tabular-nums text-xl sm:text-2xl font-bold text-[#F6DFA9]">
+                                RM {currentPrice.toLocaleString()}
+                              </span>
+                              {product.originalPrice && !currentSpec && (
+                                <span className="font-mono tabular-nums text-[11px] text-[#8C7A68] line-through">
+                                  RM {product.originalPrice.toLocaleString()}
+                                </span>
+                              )}
                             </div>
-                            {product.originalPrice && !currentSpec && (
-                              <div className="font-mono tabular-nums text-[11px] text-[#8C7A68] line-through">
-                                RM {product.originalPrice.toLocaleString()}
-                              </div>
-                            )}
+                            <div className="flex items-center gap-1.5 text-[11px] font-mono tabular-nums">
+                              <span
+                                className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                                  product.stock <= 0
+                                    ? 'bg-red-400'
+                                    : product.stock <= 10
+                                    ? 'bg-amber-400'
+                                    : 'bg-emerald-400'
+                                }`}
+                                aria-hidden="true"
+                              />
+                              <span
+                                className={
+                                  product.stock <= 0
+                                    ? 'text-red-400 font-bold'
+                                    : product.stock <= 10
+                                    ? 'text-amber-300 font-bold'
+                                    : 'text-[#D6C7B2] font-semibold'
+                                }
+                              >
+                                {product.stock <= 0
+                                  ? t('暫時售完', 'Out of stock')
+                                  : product.stock <= 10
+                                  ? t(`僅剩 ${product.stock} 件`, `Only ${product.stock} left`)
+                                  : t(`現貨庫存：${product.stock} 件`, `In Stock: ${product.stock}`)}
+                              </span>
+                            </div>
                           </div>
 
                           <button
                             type="button"
                             onClick={() => handleAdd(product)}
-                            className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition cursor-pointer active:scale-95 whitespace-nowrap ${
+                            className={`px-3.5 sm:px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition cursor-pointer active:scale-95 whitespace-nowrap shrink-0 ${
                               isAdded
                                 ? 'bg-emerald-600 text-white shadow-md'
                                 : needsSelection
@@ -1423,14 +1452,29 @@ export const Luxury3dStorefront: React.FC<Luxury3dStorefrontProps> = ({
                       {lang === 'en' ? zongziProduct.descriptionEn : zongziProduct.descriptionZh}
                     </p>
                   </div>
-                  <div className="flex items-center justify-between pt-3 border-t border-[#E5B869]/15">
-                    <span className="font-mono tabular-nums text-xl font-bold text-[#F6DFA9]">
-                      RM {zongziProduct.price}
-                    </span>
+                  <div className="flex flex-wrap items-center justify-between gap-2.5 pt-3 border-t border-[#E5B869]/15">
+                    <div className="min-w-0 space-y-0.5">
+                      <span className="font-mono tabular-nums text-xl font-bold text-[#F6DFA9] block leading-none">
+                        RM {zongziProduct.price}
+                      </span>
+                      <div className="text-[11px] font-mono tabular-nums flex items-center gap-1.5">
+                        <span
+                          className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                            zongziProduct.stock <= 0 ? 'bg-red-400' : zongziProduct.stock <= 10 ? 'bg-amber-400' : 'bg-emerald-400'
+                          }`}
+                          aria-hidden="true"
+                        />
+                        <span className={zongziProduct.stock <= 0 ? 'text-red-400 font-bold' : 'text-[#D6C7B2]'}>
+                          {zongziProduct.stock <= 0
+                            ? t('暫時售完', 'Out of stock')
+                            : t(`現貨庫存：${zongziProduct.stock} 粒`, `In Stock: ${zongziProduct.stock}`)}
+                        </span>
+                      </div>
+                    </div>
                     <button
                       type="button"
                       onClick={() => handleAdd(zongziProduct)}
-                      className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#7A1215] to-[#9E1B1F] text-[#F6DFA9] border border-[#E5B869]/45 text-xs font-bold flex items-center gap-1.5 cursor-pointer hover:brightness-110 transition"
+                      className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#7A1215] to-[#9E1B1F] text-[#F6DFA9] border border-[#E5B869]/45 text-xs font-bold flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer hover:brightness-110 transition"
                     >
                       {addedIds[zongziProduct.id] ? (
                         <>
@@ -1500,14 +1544,29 @@ export const Luxury3dStorefront: React.FC<Luxury3dStorefrontProps> = ({
                       })}
                     </div>
                   </div>
-                  <div className="flex items-center justify-between pt-3 border-t border-[#E5B869]/15">
-                    <span className="font-mono tabular-nums text-xl font-bold text-[#F6DFA9]">
-                      RM {mooncakeProduct.price}
-                    </span>
+                  <div className="flex flex-wrap items-center justify-between gap-2.5 pt-3 border-t border-[#E5B869]/15">
+                    <div className="min-w-0 space-y-0.5">
+                      <span className="font-mono tabular-nums text-xl font-bold text-[#F6DFA9] block leading-none">
+                        RM {mooncakeProduct.price}
+                      </span>
+                      <div className="text-[11px] font-mono tabular-nums flex items-center gap-1.5">
+                        <span
+                          className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                            mooncakeProduct.stock <= 0 ? 'bg-red-400' : mooncakeProduct.stock <= 10 ? 'bg-amber-400' : 'bg-emerald-400'
+                          }`}
+                          aria-hidden="true"
+                        />
+                        <span className={mooncakeProduct.stock <= 0 ? 'text-red-400 font-bold' : 'text-[#D6C7B2]'}>
+                          {mooncakeProduct.stock <= 0
+                            ? t('暫時售完', 'Out of stock')
+                            : t(`現貨庫存：${mooncakeProduct.stock} 粒`, `In Stock: ${mooncakeProduct.stock}`)}
+                        </span>
+                      </div>
+                    </div>
                     <button
                       type="button"
                       onClick={() => handleAdd(mooncakeProduct)}
-                      className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#7A1215] to-[#9E1B1F] text-[#F6DFA9] border border-[#E5B869]/45 text-xs font-bold flex items-center gap-1.5 cursor-pointer hover:brightness-110 transition"
+                      className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#7A1215] to-[#9E1B1F] text-[#F6DFA9] border border-[#E5B869]/45 text-xs font-bold flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer hover:brightness-110 transition"
                     >
                       {addedIds[mooncakeProduct.id] ? (
                         <>
@@ -1530,7 +1589,7 @@ export const Luxury3dStorefront: React.FC<Luxury3dStorefrontProps> = ({
       </section>
 
       {/* SECTION 5: DARK LUXURY BOUTIQUE FOOTER */}
-      <footer id="luxury-contact" className="bg-[#080504] border-t border-[#E5B869]/20 pt-12 pb-10">
+      <footer id="luxury-contact" className="bg-[#080504] border-t border-[#E5B869]/20 pt-12 pb-28 sm:pb-12">
         <div className="max-w-[1440px] mx-auto px-4 sm:px-8 space-y-10">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {/* Brand & Admin Portal */}
@@ -1572,25 +1631,38 @@ export const Luxury3dStorefront: React.FC<Luxury3dStorefrontProps> = ({
               </div>
             </div>
 
-            {/* WhatsApp & Email */}
+            {/* Direct Call, WhatsApp & Email */}
             <div className="space-y-2.5">
               <div className="text-xs font-bold uppercase tracking-wider text-[#E5B869]">
                 {t('聯繫訂購與批發', 'Order & Wholesale')}
               </div>
               <p className="text-xs font-semibold text-[#F5EDE0]">{settings.contactPerson}</p>
+              <div className="flex flex-col items-start gap-2">
+                <a
+                  href={formatTelHref(settings.whatsappNumber)}
+                  className="inline-flex items-center gap-1.5 min-h-[40px] px-3 py-1.5 rounded-lg bg-[#E5B869]/15 hover:bg-[#E5B869]/25 border border-[#E5B869]/40 text-xs font-mono font-bold text-[#F6DFA9] transition touch-manipulation"
+                  aria-label={t(`撥打電話 ${formatDisplayPhone(settings.whatsappNumber)}`, `Call ${formatDisplayPhone(settings.whatsappNumber)}`)}
+                >
+                  <Phone className="w-3.5 h-3.5 text-[#E5B869] shrink-0" />
+                  <span className="whitespace-nowrap">{formatDisplayPhone(settings.whatsappNumber)}</span>
+                </a>
+                <a
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 min-h-[38px] px-3 py-1.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-400/35 text-xs font-mono font-bold text-emerald-300 transition touch-manipulation"
+                >
+                  <MessageCircle className="w-3.5 h-3.5 shrink-0" />
+                  <span>{t('WhatsApp 線上諮詢', 'WhatsApp Chat')}</span>
+                </a>
+              </div>
               <a
-                href={whatsappUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-emerald-400 hover:text-[#E5B869] transition"
+                href={`mailto:${settings.email}`}
+                className="inline-flex items-center gap-1.5 text-xs text-[#BFA98D] hover:text-[#F6DFA9] font-mono break-all py-0.5 transition"
               >
-                <Phone className="w-3.5 h-3.5 shrink-0" />
-                <span>+{whatsappClean} (WhatsApp)</span>
-              </a>
-              <div className="flex items-center gap-1.5 text-xs text-[#9C8874] font-mono break-all">
                 <Mail className="w-3.5 h-3.5 shrink-0" />
                 <span>{settings.email}</span>
-              </div>
+              </a>
             </div>
 
             {/* Delivery & Social */}

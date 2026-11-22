@@ -219,11 +219,38 @@ export const HotBakKwaShowcase: React.FC<HotBakKwaShowcaseProps> = ({
                       )}
                     </div>
 
-                    {/* Product Name ONLY (Zero Tags, Zero Prices, Zero Descriptions) */}
-                    <div className="px-3 py-2.5 sm:px-3.5 sm:py-3 flex-1 flex items-center justify-center sm:justify-start">
+                    {/* Product Name & Compact Stock Status */}
+                    <div className="px-2.5 py-2 sm:px-3.5 sm:py-2.5 flex-1 flex flex-col items-center sm:items-start justify-center gap-1">
                       <h3 className="font-serif-brand font-bold text-xs sm:text-sm text-stone-900 dark:text-stone-100 group-hover/card:text-red-900 dark:group-hover/card:text-amber-300 transition-colors line-clamp-2 text-center sm:text-left leading-snug">
                         {title}
                       </h3>
+                      <div className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-mono tabular-nums">
+                        <span
+                          className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                            product.stock <= 0
+                              ? 'bg-red-500'
+                              : product.stock <= 10
+                              ? 'bg-amber-500'
+                              : 'bg-emerald-500'
+                          }`}
+                          aria-hidden="true"
+                        />
+                        <span
+                          className={
+                            product.stock <= 0
+                              ? 'text-red-600 dark:text-red-400 font-bold'
+                              : product.stock <= 10
+                              ? 'text-amber-700 dark:text-amber-400 font-bold'
+                              : 'text-stone-500 dark:text-stone-400 font-medium'
+                          }
+                        >
+                          {product.stock <= 0
+                            ? t('暫時售完', 'Sold out')
+                            : product.stock <= 10
+                            ? t(`僅剩 ${product.stock} 件`, `${product.stock} left`)
+                            : t(`庫存 ${product.stock} 件`, `Stock: ${product.stock}`)}
+                        </span>
+                      </div>
                     </div>
                   </button>
                 </div>

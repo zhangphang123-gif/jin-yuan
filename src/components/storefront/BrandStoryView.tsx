@@ -720,17 +720,26 @@ export const BrandStoryView: React.FC<BrandStoryViewProps> = ({
                 </li>
                 <li className="flex items-start gap-3">
                   <Phone className="w-5 h-5 text-[#D4AF37] shrink-0 mt-0.5" />
-                  <div>
-                    <strong className="block text-[#FFF7E8] mb-0.5">
-                      {t('聯絡電話', 'Contact Numbers')}
+                  <div className="min-w-0">
+                    <strong className="block text-[#FFF7E8] mb-1.5">
+                      {t('聯絡電話（點擊撥打）', 'Contact Numbers (Tap to Call)')}
                     </strong>
-                    <a href="tel:0124947842" className="hover:text-[#EED584] underline-offset-4 hover:underline">
-                      012-494 7842
-                    </a>
-                    <span className="mx-2 text-[#D4AF37]">/</span>
-                    <a href="tel:01129163398" className="hover:text-[#EED584] underline-offset-4 hover:underline">
-                      011-2916 3398
-                    </a>
+                    <div className="flex flex-wrap gap-2">
+                      <a
+                        href="tel:+60124947842"
+                        className="inline-flex items-center gap-1.5 min-h-[40px] px-3 py-1.5 rounded-lg bg-white/10 hover:bg-[#D4AF37]/25 border border-[#D4AF37]/35 text-[#FFF7E8] hover:text-[#EED584] font-mono text-xs sm:text-sm font-semibold transition touch-manipulation"
+                      >
+                        <Phone className="w-3.5 h-3.5 text-[#D4AF37] shrink-0" />
+                        <span>012-494 7842</span>
+                      </a>
+                      <a
+                        href="tel:+601129163398"
+                        className="inline-flex items-center gap-1.5 min-h-[40px] px-3 py-1.5 rounded-lg bg-white/10 hover:bg-[#D4AF37]/25 border border-[#D4AF37]/35 text-[#FFF7E8] hover:text-[#EED584] font-mono text-xs sm:text-sm font-semibold transition touch-manipulation"
+                      >
+                        <Phone className="w-3.5 h-3.5 text-[#D4AF37] shrink-0" />
+                        <span>011-2916 3398</span>
+                      </a>
+                    </div>
                   </div>
                 </li>
               </ul>
